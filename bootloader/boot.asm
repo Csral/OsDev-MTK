@@ -23,8 +23,25 @@ start:
 
     sti ; Enable Interrupt
 
-    mov ah, 0eh
-    mov si, message
+    mov ah, 02h
+    mov al, 1
+    mov ch, 0
+    mov cl, 2
+    mov dh, 0
+    mov bx, buffer
+
+    int 0x13
+
+    jc error
+    mov si, buffer
+    call print
+
+    cli
+    hlt
+
+error:
+
+    mov si, err_msg
     call print
 
     cli
@@ -32,6 +49,7 @@ start:
 
 print:
 
+    mov ah, 0eh
     lodsb
     
     test al, al
@@ -42,7 +60,10 @@ print:
 end:
     ret
 
-message: db "Hello World from Csral", 0
+suc_msg: db "Loaded sector", 0
+err_msg: db "Failed to load sector.", 0
 
 times 510 - ($ - $$) db 0
 dw 0xAA55
+
+buffer:
