@@ -1,3 +1,4 @@
 *.bin
 bootloader/*.bin
 kernel/*.bin
+build/
