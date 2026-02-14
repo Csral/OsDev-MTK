@@ -24,11 +24,22 @@
 #define TEXT_MODE_BIT_MASK_FG_COLOR 0b00001111
 
 #define TEXT_MODE_CHARACTERS_PER_LINE 80
+#define TEXT_MODE_VGA_WIDTH 80
+#define TEXT_MODE_VGA_HEIGHT 20
+
+unsigned int terminal_x = 0, terminal_y = 0;
 
 void kernel_main(void);
-unsigned long int print(unsigned char* str, unsigned char color, unsigned char bg_color, unsigned int offset);
-unsigned long int print_pos(unsigned char* str, unsigned char color, unsigned char bg_color, unsigned char x, unsigned char y);
-void print_char(unsigned char ch, unsigned char color, unsigned char bg_color, unsigned int offset);
-void print_char_pos(unsigned char ch, unsigned char color, unsigned char bg_color, unsigned char x, unsigned char y);
+void print(unsigned char* str);
+void printc(unsigned char* str, unsigned char color, unsigned char bg_color);
+
+void terminal_init(void);
+unsigned short VGA_make_char(unsigned char ch, unsigned char color, unsigned char bg_color);
+unsigned long int terminal_puts(const unsigned char* str, unsigned char x, unsigned char y);
+unsigned long int terminal_putsc(const unsigned char* str, unsigned char color, unsigned char bg_color, unsigned char x, unsigned char y);
+unsigned long int terminal_putsco(const unsigned char* str, unsigned char color, unsigned char bg_color, unsigned int offset);
+void terminal_puts_char(unsigned char ch, unsigned char color, unsigned char bg_color, unsigned char x, unsigned char y);
+void terminal_putso_char(unsigned char ch, unsigned char color, unsigned char bg_color, unsigned int offset);
+void clear_screen(void);
 
 #endif
