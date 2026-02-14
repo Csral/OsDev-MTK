@@ -138,6 +138,8 @@ ata_lba_read:
     
 .try_again:
 
+    ; not the best implementation: Refer https://wiki.osdev.org/ATA_PIO_Mode
+
     mov dx, 0x1F7
     in al, dx
 
