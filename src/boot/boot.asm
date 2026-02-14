@@ -90,6 +90,11 @@ pModeMain:
     mov ebp, 0x00200000
     mov esp, ebp
 
+    ; Enable A20 line
+    in al, 0x92
+    or al, 2
+    out 0x92, al
+
     cli
     hlt
 
