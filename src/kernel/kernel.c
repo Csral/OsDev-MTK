@@ -1,22 +1,19 @@
 #include "includes/kernel.h"
+#include "includes/idt.h"
+
+unsigned int terminal_x, terminal_y;
+unsigned char terminal_fg_color, terminal_bg_color;
+
+extern void problem();
 
 void kernel_main(void) {
 
     terminal_init();
+    // initialize the Interrupt descriptor table
+    idt_init();
+
     printc( (unsigned char*) "Hello World! Made by Csral :D - Ignore this: \n", TEXT_MODE_COLORS_BLACK, TEXT_MODE_COLORS_WHITE);
-    print(  (unsigned char*) " Hello There!\n");
-
-    print( (unsigned char*) "\nSo this is a new line string?\nYes!\n");
-    print((unsigned char*) "Testing the format\t tab space\n");
-    print((unsigned char*) "Testing the formab\bt backspace\n");
-    print((unsigned char*) "Testing the format\r Success \t\t\t\t\t Carriage return\n");
-
-    terminal_clear();
-
-    print((unsigned char*) "Testing new stuff: \n");
-    print((unsigned char*) "N\b");
-    print((unsigned char*) "\b");
-    print((unsigned char*) "Success!\n");
+    problem();
 
 };
 
@@ -53,6 +50,8 @@ unsigned int VGA_get_offset(unsigned char x, unsigned char y) {
 
 void terminal_init(void) {
     terminal_clear();
+    terminal_fg_color = TEXT_MODE_COLORS_WHITE;
+    terminal_bg_color = TEXT_MODE_COLORS_BLACK;
 }
 
 void terminal_puts(const unsigned char ch) {

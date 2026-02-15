@@ -27,9 +27,6 @@
 #define TEXT_MODE_VGA_WIDTH 80
 #define TEXT_MODE_VGA_HEIGHT 20
 
-unsigned int terminal_x = 0, terminal_y = 0;
-unsigned char terminal_fg_color = TEXT_MODE_COLORS_WHITE, terminal_bg_color = TEXT_MODE_COLORS_BLACK;
-
 /* Kernel Functions */
 void kernel_main(void);
 
