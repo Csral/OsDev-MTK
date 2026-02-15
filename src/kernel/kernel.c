@@ -3,39 +3,43 @@
 void kernel_main(void) {
 
     terminal_init();
-    printc( (unsigned char*) "Hello World! Made by Csral :D - Ignore this: \0", TEXT_MODE_COLORS_BLACK, TEXT_MODE_COLORS_WHITE);
+    printc( (unsigned char*) "Hello World! Made by Csral :D - Ignore this: \n", TEXT_MODE_COLORS_BLACK, TEXT_MODE_COLORS_WHITE);
+    print(  (unsigned char*) " Hello There!\n");
+
+    print( (unsigned char*) "\nSo this is a new line string?\nYes!\n");
+    print((unsigned char*) "Testing the format\t tab space\n");
+    print((unsigned char*) "Testing the formab\bt backspace\n");
+    print((unsigned char*) "Testing the format\r Success \t\t\t\t\t Carriage return\n");
+
+    terminal_clear();
+
+    print((unsigned char*) "Testing new stuff: \n");
+    print((unsigned char*) "N\b");
+    print((unsigned char*) "\b");
+    print((unsigned char*) "Success!\n");
 
 };
 
-void print(unsigned char* str) {
+void print(const unsigned char* str) {
 
-    if (terminal_x >= TEXT_MODE_CHARACTERS_PER_LINE) {
-        terminal_y++;
-        terminal_x = 0;
-    }
-
-    unsigned long int len = terminal_puts(str, terminal_x, terminal_y);
-    terminal_x += len;
-
-};
-
-void printc(unsigned char* str, unsigned char color, unsigned char bg_color) {
-
-    if (terminal_x >= TEXT_MODE_CHARACTERS_PER_LINE) {
-        terminal_y++;
-        terminal_x = 0;
-    }
-
-    unsigned long int len = terminal_putsc(str, color, bg_color, terminal_x, terminal_y);
-    terminal_x += len;
+    terminal_fg_color = TEXT_MODE_COLORS_WHITE;
+    terminal_bg_color = TEXT_MODE_COLORS_BLACK;
+    terminal_write(str);
 
 }
 
-void terminal_init(void) {
+void printc(const unsigned char* str, unsigned char color, unsigned char bg_color) {
 
-    clear_screen();
-    terminal_x = 0;
-    terminal_y = 0;
+    terminal_fg_color = color;
+    terminal_bg_color = bg_color;
+    terminal_write(str);
+}
+
+unsigned long int strlen(const unsigned char* string) {
+
+    unsigned long int length = 0;
+    while (string[length]) length ++;
+    return length;
 
 }
 
@@ -43,73 +47,94 @@ unsigned short VGA_make_char(unsigned char ch, unsigned char color, unsigned cha
     return (((bg_color << 4) | (color & TEXT_MODE_BIT_MASK_FG_COLOR)) << 8) | ch;
 };
 
-void clear_screen(void) {
+unsigned int VGA_get_offset(unsigned char x, unsigned char y) {
+    return (y * TEXT_MODE_CHARACTERS_PER_LINE) + x;
+}
 
-    for (int y = 0; y < TEXT_MODE_VGA_HEIGHT; y++)
-        for (int x = 0; x < TEXT_MODE_VGA_WIDTH; x++)
-            terminal_puts_char(' ', TEXT_MODE_COLORS_BLACK, TEXT_MODE_COLORS_BLACK, x, y);
+void terminal_init(void) {
+    terminal_clear();
+}
 
-};
+void terminal_puts(const unsigned char ch) {
 
-unsigned long int terminal_puts(const unsigned char* str, unsigned char x, unsigned char y) {
+    // Little endian 
+    unsigned short tmp_ch = (((terminal_bg_color << 4) | (terminal_fg_color & TEXT_MODE_BIT_MASK_FG_COLOR)) << 8) | ch;
+    *((volatile unsigned short*) TEXT_MODE_COLOR_BASE_ADDR + (terminal_y * TEXT_MODE_CHARACTERS_PER_LINE) + terminal_x) = tmp_ch;
+    terminal_x++;
+
+}
+
+void terminal_write(const unsigned char* str) {
 
     unsigned long int ctr = 0;
-    unsigned int offset = (y * TEXT_MODE_CHARACTERS_PER_LINE) + x;
 
-    while (str[ctr] != '\0') {
+    while (str[ctr]) {
 
-        terminal_putso_char(str[ctr], TEXT_MODE_COLORS_WHITE, TEXT_MODE_COLORS_BLACK, offset + ctr);
+        //* Handle special characters
+
+        if (terminal_x >= TEXT_MODE_CHARACTERS_PER_LINE) {
+            terminal_x = 0;
+            terminal_y++;
+        }
+
+        if (str[ctr] == '\n') {
+            terminal_x = 0;
+            terminal_y++;
+            ctr++;
+            continue;
+        } else if (str[ctr] == '\b') {
+            
+            if (terminal_x > 0) {
+                terminal_x--;
+                terminal_puts_raw(' ', TEXT_MODE_COLORS_BLACK, TEXT_MODE_COLORS_BLACK, VGA_get_offset(terminal_x, terminal_y));
+            }
+
+            ctr++;
+            continue;
+        } else if (str[ctr] == '\r') {
+            terminal_x = 0;
+            ctr++;
+            continue;
+        } else if (str[ctr] == '\t') {
+            terminal_x = (terminal_x + 4) & ~3; // align to 4-char space
+            ctr++;
+            continue;
+        }
+
+        terminal_puts(str[ctr]);
         ctr++;
 
     }
 
-    return ctr;
-
-};
-
-unsigned long int terminal_putsc(const unsigned char* str, unsigned char color, unsigned char bg_color, unsigned char x, unsigned char y) {
-
-    unsigned long int ctr = 0;
-    unsigned int offset = (y * TEXT_MODE_CHARACTERS_PER_LINE) + x;
-
-    while (str[ctr] != '\0') {
-
-        terminal_putso_char(str[ctr], color, bg_color, offset + ctr);
-        ctr++;
-
-    }
-
-    return ctr;
-
 }
 
-unsigned long int terminal_putsco(const unsigned char* str, unsigned char color, unsigned char bg_color, unsigned int offset) {
+void terminal_puts_raw(const unsigned char ch, const unsigned char color, const unsigned char bg_color, const unsigned int offset) {
 
-    unsigned long int ctr = 0;
-
-    while (str[ctr] != '\0') {
-
-        terminal_putso_char(str[ctr], color, bg_color, offset + ctr);
-        ctr++;
-
-    }
-
-    return ctr;
-    
-}
-
-void terminal_puts_char(unsigned char ch, unsigned char color, unsigned char bg_color, unsigned char x, unsigned char y) {
-
-    unsigned short tmp_ch = ((bg_color << 4) | (color & TEXT_MODE_BIT_MASK_FG_COLOR));
-    tmp_ch = ch | (tmp_ch << 8);
-    *((volatile unsigned short*) TEXT_MODE_COLOR_BASE_ADDR + (y * TEXT_MODE_CHARACTERS_PER_LINE) + x) = tmp_ch;
-
-}
-
-void terminal_putso_char(unsigned char ch, unsigned char color, unsigned char bg_color, unsigned int offset) {
-
-    unsigned short tmp_ch = ((bg_color << 4) | (color & TEXT_MODE_BIT_MASK_FG_COLOR));
-    tmp_ch = ch | (tmp_ch << 8);
+    // Little endian 
+    unsigned short tmp_ch = (((bg_color << 4) | (color & TEXT_MODE_BIT_MASK_FG_COLOR)) << 8) | ch;
     *((volatile unsigned short*) TEXT_MODE_COLOR_BASE_ADDR + offset) = tmp_ch;
 
+}
+
+void terminal_write_raw(const unsigned char* str, const unsigned char color, const unsigned char bg_color, const unsigned int offset) {
+
+    unsigned long int ctr = 0;
+    unsigned short tmp_ch;
+
+    while (str[ctr]) {
+        tmp_ch = (((bg_color << 4) | (color & TEXT_MODE_BIT_MASK_FG_COLOR)) << 8) | str[ctr];
+        *((volatile unsigned short*) TEXT_MODE_COLOR_BASE_ADDR + offset) = tmp_ch;
+    }
+
+}
+
+void terminal_clear(void) {
+
+    for (unsigned long int y = 0; y < TEXT_MODE_VGA_HEIGHT; y++)
+        for (unsigned long int x = 0; x < TEXT_MODE_VGA_WIDTH; x++)
+            terminal_puts_raw(' ', TEXT_MODE_COLORS_BLACK, TEXT_MODE_COLORS_BLACK, (y * TEXT_MODE_CHARACTERS_PER_LINE) + x);
+
+    terminal_x = 0;
+    terminal_y = 0;
+    
 }
