@@ -35,6 +35,6 @@ problem:
     ; div eax
 
     int 0
-    ; ret
+    ret
 
 times 512 - ($ - $$) db 0 ; for alignment

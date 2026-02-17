@@ -20,7 +20,6 @@ idt_int_zero_handler:
 
     pushad
 
-    cld
     call int_zero
 
     popad

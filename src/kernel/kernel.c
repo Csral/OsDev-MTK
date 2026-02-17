@@ -1,5 +1,6 @@
 #include "includes/kernel.h"
 #include "includes/idt.h"
+#include "includes/io.h"
 
 unsigned int terminal_x, terminal_y;
 unsigned char terminal_fg_color, terminal_bg_color;
@@ -13,7 +14,9 @@ void kernel_main(void) {
     idt_init();
 
     printc("Hello World! Made by Csral :D - Ignore this: \n", TEXT_MODE_COLORS_BLACK, TEXT_MODE_COLORS_WHITE);
-    problem();
+    // problem();
+
+    outb(0x60, 0xff);
 
 };
 
