@@ -10,10 +10,11 @@ void idt_init(void) {
     idtr_descriptor.size = sizeof(idt_descriptors) - 1;
     idtr_descriptor.offset = (uint32_t) idt_descriptors;
 
-    idt_set(0, int_zero);
-
     // load the idt
     idt_load(&idtr_descriptor);
+
+    /* Sets IDT table */
+    idt_set(0, &idt_int_zero_handler);
 
 }
 
@@ -29,5 +30,5 @@ void idt_set(int interrupt_number, void* addr) {
 }
 
 void int_zero(void) {
-    print( (unsigned char*) "Divide by zero error!\n\0");
+    print("Divide by zero error!\n\0");
 }

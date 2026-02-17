@@ -31,10 +31,10 @@ _start:
 
 problem:
 
-    mov eax, 0
-    div eax
+    ; mov eax, 0
+    ; div eax
 
-    ; int 0
+    int 0
     ; ret
 
 times 512 - ($ - $$) db 0 ; for alignment

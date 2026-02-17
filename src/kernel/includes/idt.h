@@ -16,6 +16,8 @@
 #define INTERRUPT_32_BIT_INTERRUPT_GATE_R2_SPACE 0xCE
 #define INTERRUPT_32_BIT_INTERRUPT_GATE_USER_SPACE 0xEE
 
+#define INTERRUPT_32_BIT_TRAP_GATE_USER_SPACE 0xEE
+
 struct IDT_Descriptor  {
 
     uint16_t low_offset; // 0 - 15
@@ -33,11 +35,12 @@ struct IDTR_Descriptor {
 
 } __attribute__((packed)) ;
 
-extern void idt_load(struct IDTR_Descriptor* ptr);
-
 void idt_init(void);
 void idt_set(int interrupt_number, void* addr);
-
 void int_zero(void);
+
+/* Loaders and Handlers from idt.asm */
+extern void idt_load(struct IDTR_Descriptor* ptr);
+extern void idt_int_zero_handler(void);
 
 #endif

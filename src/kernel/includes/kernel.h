@@ -31,18 +31,17 @@
 void kernel_main(void);
 
 /* Utilities */
-void print(const unsigned char* str);
-void printc(const unsigned char* str, unsigned char color, unsigned char bg_color);
-unsigned long int strlen(const unsigned char* string);
+void print(char* str);
+void printc(char* str, unsigned char color, unsigned char bg_color);
+unsigned long int strlen(char* string);
 
 /* Terminal and VGA Functions */
-unsigned short VGA_make_char(const unsigned char ch, const unsigned char color, const unsigned char bg_color);
-unsigned int VGA_get_offset(const unsigned char x, const unsigned char y);
+unsigned short VGA_make_char(char ch, const unsigned char color, const unsigned char bg_color);
+unsigned int VGA_get_offset(unsigned char x, const unsigned char y);
 void terminal_init(void);
-void terminal_puts(const unsigned char ch);
-void terminal_write(const unsigned char* str);
-void terminal_puts_raw(const unsigned char ch, const unsigned char color, const unsigned char bg_color, const unsigned int offset);
-void terminal_write_raw(const unsigned char* str, const unsigned char color, const unsigned char bg_color, const unsigned int offset);
+void terminal_puts(char ch);
+void terminal_write(char* str);
+void terminal_puts_raw(char ch, const unsigned char color, const unsigned char bg_color, const unsigned int offset);
 void terminal_clear(void);
 
 #endif

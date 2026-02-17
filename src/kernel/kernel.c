@@ -12,12 +12,12 @@ void kernel_main(void) {
     // initialize the Interrupt descriptor table
     idt_init();
 
-    printc( (unsigned char*) "Hello World! Made by Csral :D - Ignore this: \n", TEXT_MODE_COLORS_BLACK, TEXT_MODE_COLORS_WHITE);
+    printc("Hello World! Made by Csral :D - Ignore this: \n", TEXT_MODE_COLORS_BLACK, TEXT_MODE_COLORS_WHITE);
     problem();
 
 };
 
-void print(const unsigned char* str) {
+void print(char* str) {
 
     terminal_fg_color = TEXT_MODE_COLORS_WHITE;
     terminal_bg_color = TEXT_MODE_COLORS_BLACK;
@@ -25,14 +25,14 @@ void print(const unsigned char* str) {
 
 }
 
-void printc(const unsigned char* str, unsigned char color, unsigned char bg_color) {
+void printc(char* str, unsigned char color, unsigned char bg_color) {
 
     terminal_fg_color = color;
     terminal_bg_color = bg_color;
     terminal_write(str);
 }
 
-unsigned long int strlen(const unsigned char* string) {
+unsigned long int strlen(char* string) {
 
     unsigned long int length = 0;
     while (string[length]) length ++;
@@ -40,7 +40,7 @@ unsigned long int strlen(const unsigned char* string) {
 
 }
 
-unsigned short VGA_make_char(unsigned char ch, unsigned char color, unsigned char bg_color) {
+unsigned short VGA_make_char(char ch, unsigned char color, unsigned char bg_color) {
     return (((bg_color << 4) | (color & TEXT_MODE_BIT_MASK_FG_COLOR)) << 8) | ch;
 };
 
@@ -54,7 +54,7 @@ void terminal_init(void) {
     terminal_bg_color = TEXT_MODE_COLORS_BLACK;
 }
 
-void terminal_puts(const unsigned char ch) {
+void terminal_puts(char ch) {
 
     // Little endian 
     unsigned short tmp_ch = (((terminal_bg_color << 4) | (terminal_fg_color & TEXT_MODE_BIT_MASK_FG_COLOR)) << 8) | ch;
@@ -63,7 +63,7 @@ void terminal_puts(const unsigned char ch) {
 
 }
 
-void terminal_write(const unsigned char* str) {
+void terminal_write(char* str) {
 
     unsigned long int ctr = 0;
 
@@ -107,23 +107,11 @@ void terminal_write(const unsigned char* str) {
 
 }
 
-void terminal_puts_raw(const unsigned char ch, const unsigned char color, const unsigned char bg_color, const unsigned int offset) {
+void terminal_puts_raw(char ch, const unsigned char color, const unsigned char bg_color, const unsigned int offset) {
 
     // Little endian 
     unsigned short tmp_ch = (((bg_color << 4) | (color & TEXT_MODE_BIT_MASK_FG_COLOR)) << 8) | ch;
     *((volatile unsigned short*) TEXT_MODE_COLOR_BASE_ADDR + offset) = tmp_ch;
-
-}
-
-void terminal_write_raw(const unsigned char* str, const unsigned char color, const unsigned char bg_color, const unsigned int offset) {
-
-    unsigned long int ctr = 0;
-    unsigned short tmp_ch;
-
-    while (str[ctr]) {
-        tmp_ch = (((bg_color << 4) | (color & TEXT_MODE_BIT_MASK_FG_COLOR)) << 8) | str[ctr];
-        *((volatile unsigned short*) TEXT_MODE_COLOR_BASE_ADDR + offset) = tmp_ch;
-    }
 
 }
 
