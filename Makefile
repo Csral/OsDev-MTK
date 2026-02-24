@@ -2,10 +2,11 @@ FILES = ./build/kernel.asm.o ./build/kernel.o ./build/idt/idt.asm.o ./build/idt/
 INCLUDES = -I ./src/kernel/includes
 FLAGS = -g -ffreestanding -nostdlib -falign-jumps -falign-functions -falign-labels -falign-loops -fstrength-reduce -fomit-frame-pointer -finline-functions -Wno-unused-function -fno-builtin -Werror -Wno-unused-label -Wno-cpp -Wno-unused-parameter -nostartfiles -nodefaultlibs -Wall -O0 -Iinc
 
-all: ./bin/boot.bin ./bin/kernel.bin
+all: ./bin/boot.bin ./bin/extended.bin ./bin/kernel.bin
 
 	rm -rf ./bin/os.bin
 	dd if=./bin/boot.bin >> ./bin/os.bin
+	dd if=./bin/extended.bin >> ./bin/os.bin
 	dd if=./bin/kernel.bin >> ./bin/os.bin
 
 	dd if=/dev/zero bs=512 count=100 >> ./bin/os.bin
@@ -16,6 +17,9 @@ all: ./bin/boot.bin ./bin/kernel.bin
 
 ./bin/boot.bin: ./src/boot/boot.asm
 	nasm -f bin ./src/boot/boot.asm -o ./bin/boot.bin
+
+./bin/extended.bin: ./src/boot/extended.asm
+	nasm -f bin ./src/boot/extended.asm -o ./bin/extended.bin
 
 ./build/kernel.asm.o: ./src/kernel/kernel.asm
 	nasm -f elf -g ./src/kernel/kernel.asm -o ./build/kernel.asm.o
