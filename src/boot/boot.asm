@@ -21,10 +21,9 @@ start:
 
     sti ; Enable Interrupt
 
-    ; Load extended bootloader
+    call clear_window
 
-    mov si, pre_msg
-    call print
+    ; Load extended bootloader
 
     mov ah, 0x02
     mov al, 0x01
@@ -40,6 +39,36 @@ start:
     call print
 
     jmp EMain
+
+clear_window:
+
+    push bp
+    mov bp, sp
+
+    pusha
+
+    mov ah, 0x07
+    xor al, al
+    mov bh, 0x07 ; white on black
+
+    xor cx, cx ; low right row&col
+    mov dh, 24 ; row up left
+    mov dl, 79 ; col up left
+
+    int 0x10
+
+    mov ah, 0x02
+    xor bh, bh
+    xor dx, dx
+
+    int 0x10
+
+    popa
+
+    mov sp, bp
+    pop bp
+
+    ret
 
 print:
 
@@ -67,7 +96,6 @@ ELoadError:
 
 err_msg: db "Failed to load extended bootloader!", 0
 suc_msg: db "Jumping to Extended bootloader", 0
-pre_msg: db "Loading extended bootloader...", 0
 
 times 510 - ($ - $$) db 0
 dw 0xAA55

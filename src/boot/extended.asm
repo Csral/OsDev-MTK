@@ -20,6 +20,9 @@ EMain:
     call print
 
     ; Do Stuff
+
+    mov si, PMode_msg
+    call print
     jmp 0x00:load_protected
 
 load_protected:
@@ -43,13 +46,79 @@ print:
         test al, al
         jz .end
 
+        cmp al, '\n'
+        je .handle_new_line
+
         int 0x10 ; print
+        jmp .loop
+
+    .handle_new_line:
+
+        call get_cursor_position
+        ; ah has row, increment by one and continue
+
+        inc ah
+        xor al, al
+        mov dx, ax
+        call set_cursor_position
+
+        ; reset system call entry id
+        xor ax, ax
+        mov ah, 0x0E
+
+        lodsb
         jmp .loop
 
     .end:
         ret
 
-ld_msg: db "Started extended bootloader.", 0
+set_cursor_position:
+
+    push bp
+    mov bp, sp
+
+    push bx
+
+    ; pass row + column in dx: dh = row, dl = col
+    mov ah, 0x02
+    xor bh, bh
+
+    int 0x10
+
+    pop bx
+
+    mov sp, bp
+    pop bp
+
+    ret
+
+get_cursor_position:
+
+    ; ah = dh = row
+    ; al = dl = col
+
+    push bp
+    mov bp, sp
+
+    push bx
+    push cx
+
+    mov ah, 0x03
+    xor bh, bh
+
+    int 0x10
+    mov ax, dx
+
+    pop cx
+    pop bx
+
+    mov sp, bp
+    pop bp
+
+    ret
+
+ld_msg: db "\nStarted extended bootloader.\n", 0
+PMode_msg: db "Switching to protected mode.\n", 0
 
 ; GDT
 
