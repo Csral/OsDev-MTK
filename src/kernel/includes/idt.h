@@ -36,11 +36,15 @@ struct IDTR_Descriptor {
 } __attribute__((packed)) ;
 
 void idt_init(void);
-void idt_set(int interrupt_number, void* addr);
+void idt_set(int interrupt_number, void* addr, uint16_t selector, uint8_t type_attr);
 void int_zero(void);
+void int_gp_fault(uintptr_t address, uint32_t err_code);
 
 /* Loaders and Handlers from idt.asm */
 extern void idt_load(struct IDTR_Descriptor* ptr);
+
+/* Interrupt handlers */
 extern void idt_int_zero_handler(void);
+extern void general_protection_fault(void);
 
 #endif
