@@ -24,10 +24,44 @@ _start:
     or al, 2
     out 0x92, al
 
+    ; remap the master PIC 
+    ; start initialization
+    mov al, 0x11
+    out 0x20, al
+    out 0xA0, al
+
+    ; set vector offsets
+    mov al, 0x20
+    out 0x21, al
+
+    mov al, 0x28
+    out 0xA1, al
+
+    ; tell master PIC about slave at IRQ2
+    mov al, 0x04
+    out 0x21, al
+
+    ; tell slave PIC its cascade identity
+    mov al, 0x02
+    out 0xA1, al
+
+    ; set 8086 mode
+    mov al, 0x01
+    out 0x21, al
+    out 0xA1, al
+
+    mov al, 0x00
+    out 0x21, al
+    out 0xA1, al
+
+    ; End remapping the master PIC
+
     call kernel_main
 
-    cli
-    hlt
+    sti
+    .loop:
+        hlt
+        jmp .loop
 
 problem:
 
@@ -40,7 +74,8 @@ problem:
     ; mov ax, 0x1233
     ; mov ds, ax
 
-    ; int 13
+    ; int 50h
+    hlt
     ret
 
 times 512 - ($ - $$) db 0 ; for alignment

@@ -2,14 +2,32 @@ section .asm
 global idt_load
 
 ; Interrupt handler exports
+
+global enable_interrupts
+global disable_interrupts
+
 global idt_int_zero_handler
+global int_21_h
 global general_protection_fault
 global unhandled_interrupts
+global no_interrupt_routine
 
 ; 32-bit Kernel Handler functions
 extern int_zero
+extern int_21_handler
 extern int_gp_fault
 extern unhandled_interrupts_handler_basic
+extern no_interrupt_routine_handler
+
+disable_interrupts:
+    
+    cli
+    ret
+
+enable_interrupts:
+
+    sti
+    ret
 
 idt_load:
     push ebp
@@ -72,3 +90,38 @@ unhandled_interrupts:
     popad
     mov esp, ebp
     pop ebp
+
+    iret
+
+int_21_h:
+
+    cli
+    push ebp
+    mov ebp, esp
+    pushad
+
+    call int_21_handler
+    
+    popad
+    mov esp, ebp
+    pop ebp
+    sti
+
+    iret
+
+no_interrupt_routine:
+
+    cli
+    push ebp
+    mov ebp, esp
+    pushad
+
+    call no_interrupt_routine_handler
+
+    ; restore proper stack before making this generic
+    popad
+    mov esp, ebp
+    pop ebp
+
+    sti
+    iret

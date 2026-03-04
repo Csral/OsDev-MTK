@@ -1,10 +1,10 @@
 #ifndef _IO_H_
 #define _IO_H_
 
-unsigned char insb(unsigned short port);
-unsigned short insw(unsigned short port);
+extern unsigned char insb(unsigned short port);
+extern unsigned short insw(unsigned short port);
 
-void outb(unsigned short port, unsigned char val);
-void outw(unsigned short port, unsigned short val);
+extern void outb(unsigned short port, unsigned char val);
+extern void outw(unsigned short port, unsigned short val);
 
 #endif

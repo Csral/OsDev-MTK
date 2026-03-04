@@ -14,11 +14,13 @@ void kernel_main(void) {
     terminal_init();
     // initialize the Interrupt descriptor table
     idt_init();
+    enable_interrupts();
+
+    problem();
 
     print("Hello World! Made by Csral :D - Ignore this: \n");
     
     printint(-1124);
-    outb(0x60, 0xff);
 
     *((uint16_t*) 0x5252) = VGA_make_char('A', TEXT_MODE_COLORS_WHITE, TEXT_MODE_COLORS_BLACK);
     *((uint16_t*) 0x5254) = VGA_make_char('B', TEXT_MODE_COLORS_WHITE, TEXT_MODE_COLORS_BLACK);
@@ -52,6 +54,7 @@ void kernel_main(void) {
     print(" - And that how multi wise printing works. Anyways, memcpy works right?\n");
 
     problem();
+    // terminal_clear();
 
 };
 

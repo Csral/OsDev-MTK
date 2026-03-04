@@ -1,5 +1,7 @@
 #include "../includes/idt.h"
 #include "../includes/memory/memory.h"
+#include "../includes/io.h"
+#include "../includes/config.h"
 
 struct IDT_Descriptor idt_descriptors[IDT_MAX_ENTRIES]; //* The literal IDT table
 struct IDTR_Descriptor idtr_descriptor;
@@ -13,17 +15,21 @@ void idt_init(void) {
     // load the idt
     idt_load(&idtr_descriptor);
 
-    /* Sets IDT table */
+    /* Initialize all interrupt handlers as unhandled - THEY HALT THE CPU. */
+
+    for (int i = 0; i < IDT_CPU_EXCEPTION_ENTRIES; i++)
+        idt_set(i, &unhandled_interrupts, KERNEL_CODE_SELECTOR, INTERRUPT_32_BIT_INTERRUPT_GATE_KERNEL_SPACE);
+
+    for (int i = IDT_IRQ_STARTING_INTERRUPT_NUMBER; i < IDT_IRQ_END_INTERRUPT_NUMBER; i++)
+        idt_set(i, &no_interrupt_routine, KERNEL_CODE_SELECTOR, INTERRUPT_32_BIT_INTERRUPT_GATE_KERNEL_SPACE);
+
+    for (int i = IDT_FREE_STARTING_INTERRUPT_NUMBER; i < IDT_MAX_ENTRIES; i++)
+        idt_set(i, &unhandled_interrupts, KERNEL_CODE_SELECTOR, INTERRUPT_32_BIT_INTERRUPT_GATE_KERNEL_SPACE);
+
+    /* Set IDT table with handled interrupts */
     idt_set(0, &idt_int_zero_handler, KERNEL_CODE_SELECTOR, INTERRUPT_32_BIT_INTERRUPT_GATE_USER_SPACE);
     idt_set(13, &general_protection_fault, KERNEL_CODE_SELECTOR, INTERRUPT_32_BIT_INTERRUPT_GATE_KERNEL_SPACE);
-
-    /* Initialize all unhandled interrupts - THEY HALT CPU */
-    
-    for (int i = 1; i < 13; i++)
-        idt_set(i, &unhandled_interrupts, KERNEL_CODE_SELECTOR, INTERRUPT_32_BIT_INTERRUPT_GATE_KERNEL_SPACE);
-
-    for (int i = 14; i < 32; i++)
-        idt_set(i, &unhandled_interrupts, KERNEL_CODE_SELECTOR, INTERRUPT_32_BIT_INTERRUPT_GATE_KERNEL_SPACE);
+    idt_set(33, &int_21_h, KERNEL_CODE_SELECTOR, INTERRUPT_32_BIT_INTERRUPT_GATE_KERNEL_SPACE);
 
 }
 
@@ -59,4 +65,13 @@ void int_gp_fault(uintptr_t address, uint32_t err_code) {
 
 void unhandled_interrupts_handler_basic(void) {
     print("\nUnhandled interrupt triggered!\tHalting CPU.\n");
+}
+
+void int_21_handler(void) {
+    print("\nKeyboard pressed!\n");
+    outb(0x20, 0x20);
+}
+
+void no_interrupt_routine_handler(void) {
+    outb(0x20, 0x20);
 }
