@@ -1,6 +1,9 @@
 #ifndef _KERNEL_H_
 #define _KERNEL_H_
 
+#include <stddef.h>
+#include <stdint.h>
+
 #define TEXT_MODE_COLOR_BASE_ADDR 0xB8000
 
 #define TEXT_MODE_COLORS_BLACK 0
@@ -32,7 +35,9 @@ void kernel_main(void);
 
 /* Utilities */
 void print(char* str);
+void print_hex_byte(uint8_t byte);
 void printc(char* str, unsigned char color, unsigned char bg_color);
+void printint(int num);
 unsigned long int strlen(char* string);
 
 /* Terminal and VGA Functions */
