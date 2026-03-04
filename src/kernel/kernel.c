@@ -1,6 +1,7 @@
 #include "includes/kernel.h"
 #include "includes/idt.h"
 #include "includes/io.h"
+#include "includes/math/math.h"
 
 unsigned int terminal_x, terminal_y;
 unsigned char terminal_fg_color, terminal_bg_color;
@@ -13,10 +14,12 @@ void kernel_main(void) {
     // initialize the Interrupt descriptor table
     idt_init();
 
-    printc("Hello World! Made by Csral :D - Ignore this: \n", TEXT_MODE_COLORS_BLACK, TEXT_MODE_COLORS_WHITE);
-    // problem();
-
+    print("Hello World! Made by Csral :D - Ignore this: \n");
+    
+    printint(-1124);
     outb(0x60, 0xff);
+
+    problem();
 
 };
 
@@ -28,11 +31,49 @@ void print(char* str) {
 
 }
 
+void print_hex_byte(uint8_t byte) {
+
+    const char* hex = "0123456789ABCDEF";
+
+    terminal_puts(hex[(byte >> 4) & 0xF]);  // high nibble
+    terminal_puts(hex[byte & 0xF]);         // low nibble
+    terminal_puts(' ');
+
+}
+
 void printc(char* str, unsigned char color, unsigned char bg_color) {
 
     terminal_fg_color = color;
     terminal_bg_color = bg_color;
     terminal_write(str);
+}
+
+void printint(int num) {
+
+    if (num < 0) {
+        terminal_puts('-');
+        num *= -1;
+    }
+
+    int32_t bkp = num;
+    size_t num_len = 0;
+    long int divres = 0;
+
+    while (num) {
+        num /= 10;
+        num_len++;
+    }
+
+    for (size_t i = 0; i < num_len; i++) {
+        
+        divres = pow(10,num_len-i-1);
+        
+        terminal_puts(
+            48 + bkp / divres
+        );
+        bkp = bkp % divres;
+    }
+
 }
 
 unsigned long int strlen(char* string) {
