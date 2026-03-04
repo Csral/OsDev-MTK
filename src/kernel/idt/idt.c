@@ -14,21 +14,37 @@ void idt_init(void) {
     idt_load(&idtr_descriptor);
 
     /* Sets IDT table */
-    idt_set(0, &idt_int_zero_handler);
+    idt_set(0, &idt_int_zero_handler, KERNEL_CODE_SELECTOR, INTERRUPT_32_BIT_INTERRUPT_GATE_USER_SPACE);
+    idt_set(13, &general_protection_fault, KERNEL_CODE_SELECTOR, INTERRUPT_32_BIT_INTERRUPT_GATE_KERNEL_SPACE);
 
 }
 
-void idt_set(int interrupt_number, void* addr) {
+void idt_set(int interrupt_number, void* addr, uint16_t selector, uint8_t type_attr) {
 
     struct IDT_Descriptor* descriptor = &idt_descriptors[interrupt_number];
     descriptor->low_offset = (uint32_t) addr & IDT_ENTRY_MASK_LOW_OFFSET;
-    descriptor->selector = KERNEL_CODE_SELECTOR;
+    descriptor->selector = selector;
     descriptor->reserved = 0x00;
-    descriptor->type_attr = INTERRUPT_32_BIT_INTERRUPT_GATE_USER_SPACE;
+    descriptor->type_attr = type_attr;
     descriptor->high_offset = (uint32_t) addr >> 16;
 
 }
 
 void int_zero(void) {
     print("Divide by zero error!\n\0");
+}
+
+void int_gp_fault(uintptr_t address, uint32_t err_code) {
+    terminal_clear();
+    print("General Protection Fault (#GP) raised at address: ");
+    printint(address);
+    print("\nError Code: ");
+    printint(err_code);
+    print("\n INS:");
+
+    for (uint8_t i = 0; i < 8; i++) {
+        print_hex_byte(*((uint8_t*) address + i));
+    }
+
+    print("\nCPU Halted.");
 }
