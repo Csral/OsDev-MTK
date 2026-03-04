@@ -4,10 +4,12 @@ global idt_load
 ; Interrupt handler exports
 global idt_int_zero_handler
 global general_protection_fault
+global unhandled_interrupts
 
 ; 32-bit Kernel Handler functions
 extern int_zero
 extern int_gp_fault
+extern unhandled_interrupts_handler_basic
 
 idt_load:
     push ebp
@@ -53,3 +55,20 @@ general_protection_fault:
     add esp, 4
     
     iret
+
+unhandled_interrupts:
+
+    push ebp
+    mov ebp, esp
+    pushad
+
+    call unhandled_interrupts_handler_basic
+
+    cli
+    hlt
+
+    ; restore proper stack before making this generic
+
+    popad
+    mov esp, ebp
+    pop ebp
