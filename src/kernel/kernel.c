@@ -2,6 +2,7 @@
 #include "includes/idt.h"
 #include "includes/io.h"
 #include "includes/math/math.h"
+#include "includes/memory/memory.h"
 
 unsigned int terminal_x, terminal_y;
 unsigned char terminal_fg_color, terminal_bg_color;
@@ -18,6 +19,37 @@ void kernel_main(void) {
     
     printint(-1124);
     outb(0x60, 0xff);
+
+    *((uint16_t*) 0x5252) = VGA_make_char('A', TEXT_MODE_COLORS_WHITE, TEXT_MODE_COLORS_BLACK);
+    *((uint16_t*) 0x5254) = VGA_make_char('B', TEXT_MODE_COLORS_WHITE, TEXT_MODE_COLORS_BLACK);
+    *((uint16_t*) 0x5256) = VGA_make_char('C', TEXT_MODE_COLORS_WHITE, TEXT_MODE_COLORS_BLACK);
+
+    print("\n\n");
+
+    memcpy(
+        (void*) (unsigned long) (TEXT_MODE_COLOR_BASE_ADDR + (terminal_x + (terminal_y * TEXT_MODE_CHARACTERS_PER_LINE)) * 2),
+        (void*) 0x5252,
+        2
+    );
+
+    terminal_x++;
+    memcpy(
+        (void*) (unsigned long) (TEXT_MODE_COLOR_BASE_ADDR + (terminal_x + (terminal_y * TEXT_MODE_CHARACTERS_PER_LINE)) * 2),
+        (void*) 0x5254,
+        2
+    );
+
+    terminal_x++;
+
+    memcpy(
+        (void*) (unsigned long) (TEXT_MODE_COLOR_BASE_ADDR + (terminal_x + (terminal_y * TEXT_MODE_CHARACTERS_PER_LINE)) * 2),
+        (void*) 0x5256,
+        2
+    );
+
+    terminal_x++;
+
+    print(" - And that how multi wise printing works. Anyways, memcpy works right?\n");
 
     problem();
 
