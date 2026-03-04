@@ -38,7 +38,7 @@ start:
     mov si, suc_msg
     call print
 
-    jmp EMain
+    jmp 0x00:EMain
 
 clear_window:
 

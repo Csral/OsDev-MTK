@@ -21,14 +21,15 @@ EMain:
 
     ; Do Stuff
 
-    mov si, PMode_msg
-    call print
     jmp 0x00:load_protected
 
 load_protected:
 
     cli
     lgdt [gdt_descriptor]
+
+    mov si, PMode_msg
+    call print
 
     mov eax, cr0
     or al, 1
@@ -71,6 +72,36 @@ print:
 
     .end:
         ret
+
+clear_window:
+
+    push bp
+    mov bp, sp
+
+    pusha
+
+    mov ah, 0x07
+    xor al, al
+    mov bh, 0x07 ; white on black
+
+    xor cx, cx ; low right row&col
+    mov dh, 24 ; row up left
+    mov dl, 79 ; col up left
+
+    int 0x10
+
+    mov ah, 0x02
+    xor bh, bh
+    xor dx, dx
+
+    int 0x10
+
+    popa
+
+    mov sp, bp
+    pop bp
+
+    ret
 
 set_cursor_position:
 
@@ -168,6 +199,7 @@ pModeMain:
     mov edi, 0x0100000
 
     call ata_lba_read
+
     jmp CODE_SEG:0x0100000
 
 ata_lba_read:
