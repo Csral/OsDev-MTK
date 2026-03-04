@@ -31,10 +31,16 @@ _start:
 
 problem:
 
+    ; Check interrupts/traps here.
+
     ; mov eax, 0
     ; div eax
 
-    int 0
+    ; jmp DATA_SEG:0xFFFF
+    ; mov ax, 0x1233
+    ; mov ds, ax
+
+    ; int 13
     ret
 
 times 512 - ($ - $$) db 0 ; for alignment
