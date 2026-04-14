@@ -34,19 +34,23 @@
 void kernel_main(void);
 
 /* Utilities */
-void print(char* str);
-void print_hex_byte(uint8_t byte);
-void printc(char* str, unsigned char color, unsigned char bg_color);
+void print(const char* str);
+void print_hex_byte(const uint8_t byte);
+void printc(const char* str, const unsigned char color, const unsigned char bg_color);
 void printint(int num);
-unsigned long int strlen(char* string);
+unsigned long int strlen(const char* string);
 
 /* Terminal and VGA Functions */
-unsigned short VGA_make_char(char ch, const unsigned char color, const unsigned char bg_color);
-unsigned int VGA_get_offset(unsigned char x, const unsigned char y);
+unsigned short VGA_make_char(const char ch, const unsigned char color, const unsigned char bg_color);
+unsigned int VGA_get_offset(const unsigned char x, const unsigned char y);
 void terminal_init(void);
-void terminal_puts(char ch);
-void terminal_write(char* str);
-void terminal_puts_raw(char ch, const unsigned char color, const unsigned char bg_color, const unsigned int offset);
+void terminal_puts(const char ch);
+void terminal_write(const char* str);
+void terminal_puts_raw(const char ch, const unsigned char color, const unsigned char bg_color, const unsigned int offset);
 void terminal_clear(void);
+
+/* Kernel functions */
+extern __attribute__((noreturn)) void __panic(void);
+__attribute__((noreturn)) void kernel_panic(const char* msg);
 
 #endif

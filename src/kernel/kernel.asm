@@ -2,6 +2,7 @@
 
 global _start
 global problem
+global __panic
 extern kernel_main
 
 CODE_SEG equ 0x08
@@ -59,9 +60,17 @@ _start:
     call kernel_main
 
     sti
+    cli
     .loop:
         hlt
         jmp .loop
+
+__panic:
+
+    cli
+    .panic_loop:
+        hlt
+        jmp .panic_loop
 
 problem:
 
@@ -75,7 +84,7 @@ problem:
     ; mov ds, ax
 
     ; int 50h
-    hlt
+    ; hlt
     ret
 
 times 512 - ($ - $$) db 0 ; for alignment

@@ -3,6 +3,7 @@
 #include "includes/io.h"
 #include "includes/math/math.h"
 #include "includes/memory/memory.h"
+#include "includes/memory/heap/kheap.h"
 
 unsigned int terminal_x, terminal_y;
 unsigned char terminal_fg_color, terminal_bg_color;
@@ -13,6 +14,7 @@ void kernel_main(void) {
 
     terminal_init();
     // initialize the Interrupt descriptor table
+    kheap_init();
     idt_init();
     enable_interrupts();
 
@@ -53,12 +55,36 @@ void kernel_main(void) {
 
     print(" - And that how multi wise printing works. Anyways, memcpy works right?\n");
 
-    problem();
+    // problem();
     // terminal_clear();
+
+    void* ptr = kmalloc(25); // request 25 bytes.
+    void* ptr2 = kmalloc(5000);
+
+    void* ptr3 = kmalloc(5300);
+
+    kfree(ptr);
+    void* ptr4 = kmalloc(50);
+
+    kfree(ptr2);
+
+    if (ptr || ptr2 || ptr3 || ptr4 ){
+
+    }
 
 };
 
-void print(char* str) {
+__attribute__((noreturn)) void kernel_panic(const char* msg) {
+
+    if (terminal_y >= TEXT_MODE_VGA_HEIGHT) terminal_clear();
+
+    print("\nKernel panic: ");
+    print(msg);
+    __panic();
+
+};
+
+void print(const char* str) {
 
     terminal_fg_color = TEXT_MODE_COLORS_WHITE;
     terminal_bg_color = TEXT_MODE_COLORS_BLACK;
@@ -66,7 +92,7 @@ void print(char* str) {
 
 }
 
-void print_hex_byte(uint8_t byte) {
+void print_hex_byte(const uint8_t byte) {
 
     const char* hex = "0123456789ABCDEF";
 
@@ -76,7 +102,7 @@ void print_hex_byte(uint8_t byte) {
 
 }
 
-void printc(char* str, unsigned char color, unsigned char bg_color) {
+void printc(const char* str, const unsigned char color, const unsigned char bg_color) {
 
     terminal_fg_color = color;
     terminal_bg_color = bg_color;
@@ -111,7 +137,7 @@ void printint(int num) {
 
 }
 
-unsigned long int strlen(char* string) {
+unsigned long int strlen(const char* string) {
 
     unsigned long int length = 0;
     while (string[length]) length ++;
@@ -119,11 +145,11 @@ unsigned long int strlen(char* string) {
 
 }
 
-unsigned short VGA_make_char(char ch, unsigned char color, unsigned char bg_color) {
+unsigned short VGA_make_char(const char ch, const unsigned char color, const unsigned char bg_color) {
     return (((bg_color << 4) | (color & TEXT_MODE_BIT_MASK_FG_COLOR)) << 8) | ch;
 };
 
-unsigned int VGA_get_offset(unsigned char x, unsigned char y) {
+unsigned int VGA_get_offset(const unsigned char x, const unsigned char y) {
     return (y * TEXT_MODE_CHARACTERS_PER_LINE) + x;
 }
 
@@ -133,7 +159,7 @@ void terminal_init(void) {
     terminal_bg_color = TEXT_MODE_COLORS_BLACK;
 }
 
-void terminal_puts(char ch) {
+void terminal_puts(const char ch) {
 
     // Little endian 
     unsigned short tmp_ch = (((terminal_bg_color << 4) | (terminal_fg_color & TEXT_MODE_BIT_MASK_FG_COLOR)) << 8) | ch;
@@ -142,7 +168,7 @@ void terminal_puts(char ch) {
 
 }
 
-void terminal_write(char* str) {
+void terminal_write(const char* str) {
 
     unsigned long int ctr = 0;
 
@@ -186,7 +212,7 @@ void terminal_write(char* str) {
 
 }
 
-void terminal_puts_raw(char ch, const unsigned char color, const unsigned char bg_color, const unsigned int offset) {
+void terminal_puts_raw(const char ch, const unsigned char color, const unsigned char bg_color, const unsigned int offset) {
 
     // Little endian 
     unsigned short tmp_ch = (((bg_color << 4) | (color & TEXT_MODE_BIT_MASK_FG_COLOR)) << 8) | ch;
