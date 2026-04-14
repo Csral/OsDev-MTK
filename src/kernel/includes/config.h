@@ -14,4 +14,13 @@
 /* Interrupt numbers are free from this point */
 #define IDT_FREE_STARTING_INTERRUPT_NUMBER 0x30
 
+/* Heap - 100MB Heap size. */
+
+#define HEAP_MAX_HEAP_SIZE 104857600U
+#define HEAP_MAX_HEAP_BLOCKS_ENTRIES 25600U
+#define HEAP_BLOCK_SIZE 4096U
+
+#define HEAP_BASE_ADDRESS 0x01000000
+#define HEAP_TABLE_ADDRESS 0x00007E00
+
 #endif
