@@ -45,6 +45,7 @@ void int_gp_fault(uintptr_t address, uint32_t err_code);
 void unhandled_interrupts_handler_basic(void);
 
 /* IRQs */
+void timer_handler(void);
 void int_21_handler(void);
 void no_interrupt_routine_handler(void);
 
@@ -53,6 +54,7 @@ extern void idt_load(struct IDTR_Descriptor* ptr);
 
 /* Interrupt handlers */
 extern void idt_int_zero_handler(void);
+extern void idt_20_h(void);
 extern void int_21_h(void);
 extern void general_protection_fault(void);
 
