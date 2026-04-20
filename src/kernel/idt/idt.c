@@ -29,6 +29,7 @@ void idt_init(void) {
     /* Set IDT table with handled interrupts */
     idt_set(0, &idt_int_zero_handler, KERNEL_CODE_SELECTOR, INTERRUPT_32_BIT_INTERRUPT_GATE_USER_SPACE);
     idt_set(13, &general_protection_fault, KERNEL_CODE_SELECTOR, INTERRUPT_32_BIT_INTERRUPT_GATE_KERNEL_SPACE);
+    idt_set(32, &idt_20_h, KERNEL_CODE_SELECTOR, INTERRUPT_32_BIT_INTERRUPT_GATE_KERNEL_SPACE);
     idt_set(33, &int_21_h, KERNEL_CODE_SELECTOR, INTERRUPT_32_BIT_INTERRUPT_GATE_KERNEL_SPACE);
 
 }
@@ -65,6 +66,10 @@ void int_gp_fault(uintptr_t address, uint32_t err_code) {
 
 void unhandled_interrupts_handler_basic(void) {
     print("\nUnhandled interrupt triggered!\tHalting CPU.\n");
+}
+
+void timer_handler(void) {
+    outb(0x20, 0x20);
 }
 
 void int_21_handler(void) {

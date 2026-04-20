@@ -7,6 +7,7 @@ global enable_interrupts
 global disable_interrupts
 
 global idt_int_zero_handler
+global idt_20_h
 global int_21_h
 global general_protection_fault
 global unhandled_interrupts
@@ -14,6 +15,7 @@ global no_interrupt_routine
 
 ; 32-bit Kernel Handler functions
 extern int_zero
+extern timer_handler
 extern int_21_handler
 extern int_gp_fault
 extern unhandled_interrupts_handler_basic
@@ -91,6 +93,21 @@ unhandled_interrupts:
     mov esp, ebp
     pop ebp
 
+    iret
+
+idt_20_h:
+    cli
+
+    push ebp
+    mov ebp, esp
+    pushad
+
+    call timer_handler
+
+    popad
+    mov esp, ebp
+    pop ebp
+    sti
     iret
 
 int_21_h:
