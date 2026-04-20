@@ -1,76 +1,30 @@
-#include "includes/kernel.h"
+#include "kernel.h"
 #include "includes/idt.h"
 #include "includes/io.h"
 #include "includes/math/math.h"
 #include "includes/memory/memory.h"
 #include "includes/memory/heap/kheap.h"
+#include "includes/memory/paging/paging.h"
 
 unsigned int terminal_x, terminal_y;
 unsigned char terminal_fg_color, terminal_bg_color;
 
 extern void problem();
 
+static struct paging_4gb_memory_map* kernel_paging_chunk = 0;
+
 void kernel_main(void) {
 
+    disable_interrupts();
     terminal_init();
-    // initialize the Interrupt descriptor table
     kheap_init();
     idt_init();
+    kernel_paging_chunk = _gen_paging_4gb(PAGING_MASKS_IS_WRITABLE | PAGING_MASKS_IS_PRESENT | PAGING_MASKS_ACCESS_ALL);
+    paging_switch(kernel_paging_chunk->d_entry);
+    enable_paging();
     enable_interrupts();
 
-    problem();
-
-    print("Hello World! Made by Csral :D - Ignore this: \n");
-    
-    printint(-1124);
-
-    *((uint16_t*) 0x5252) = VGA_make_char('A', TEXT_MODE_COLORS_WHITE, TEXT_MODE_COLORS_BLACK);
-    *((uint16_t*) 0x5254) = VGA_make_char('B', TEXT_MODE_COLORS_WHITE, TEXT_MODE_COLORS_BLACK);
-    *((uint16_t*) 0x5256) = VGA_make_char('C', TEXT_MODE_COLORS_WHITE, TEXT_MODE_COLORS_BLACK);
-
-    print("\n\n");
-
-    memcpy(
-        (void*) (unsigned long) (TEXT_MODE_COLOR_BASE_ADDR + (terminal_x + (terminal_y * TEXT_MODE_CHARACTERS_PER_LINE)) * 2),
-        (void*) 0x5252,
-        2
-    );
-
-    terminal_x++;
-    memcpy(
-        (void*) (unsigned long) (TEXT_MODE_COLOR_BASE_ADDR + (terminal_x + (terminal_y * TEXT_MODE_CHARACTERS_PER_LINE)) * 2),
-        (void*) 0x5254,
-        2
-    );
-
-    terminal_x++;
-
-    memcpy(
-        (void*) (unsigned long) (TEXT_MODE_COLOR_BASE_ADDR + (terminal_x + (terminal_y * TEXT_MODE_CHARACTERS_PER_LINE)) * 2),
-        (void*) 0x5256,
-        2
-    );
-
-    terminal_x++;
-
-    print(" - And that how multi wise printing works. Anyways, memcpy works right?\n");
-
-    // problem();
-    // terminal_clear();
-
-    void* ptr = kmalloc(25); // request 25 bytes.
-    void* ptr2 = kmalloc(5000);
-
-    void* ptr3 = kmalloc(5300);
-
-    kfree(ptr);
-    void* ptr4 = kmalloc(50);
-
-    kfree(ptr2);
-
-    if (ptr || ptr2 || ptr3 || ptr4 ){
-
-    }
+    print("Kernel Setup finished.\n");
 
 };
 
