@@ -9,13 +9,24 @@ CODE_SEG equ 0x08
 DATA_SEG equ 0x10
 
 _start:
+    
+    ; mov ax, DATA_SEG
+    ; mov ds, ax
+    ; mov es, ax
+    ; mov fs, ax
+    ; mov gs, ax
+    ; mov ss, ax
 
-    mov ax, DATA_SEG
-    mov ds, ax
-    mov es, ax
-    mov fs, ax
-    mov ss, ax
-    mov gs, ax
+    lgdt [kernel_gdt_descriptor]
+
+    jmp CODE_SEG:.reload_cs
+    .reload_cs:
+        mov ax, DATA_SEG
+        mov ds, ax
+        mov es, ax
+        mov fs, ax
+        mov gs, ax
+        mov ss, ax
 
     mov ebp, 0x00200000
     mov esp, ebp
@@ -56,10 +67,10 @@ _start:
     out 0xA1, al
 
     ; End remapping the master PIC
-
+    cli
     call kernel_main
 
-    sti
+    jmp $                 ; just to be sure.
     cli
     .loop:
         hlt
@@ -86,5 +97,47 @@ problem:
     ; int 50h
     ; hlt
     ret
+
+
+; Kernel's GDT
+kernel_gdt:
+
+kernel_gdt_null:
+
+    dd 0x0
+    dd 0x0
+
+; offset 0x8
+kernel_gdt_code: ; cs shud point here
+
+    dw 0xFFFF       ; segment limit first 0 to 15 bits
+    
+    dw 0x0000       ; base 0 to 15 bits
+    db 0x00         ; base 16 to 23 bits
+    
+    db 0x9A         ; Access byte
+    db 0xCF         ; Flags + 16 to 19 bits of limit
+
+    db 0x0          ; base 24 to 31 bits
+
+; offset 0x10
+kernel_gdt_data:   ; DS, SS, FS, ES, GS
+
+    dw 0xFFFF       ; segment limit first 0 to 15 bits
+    
+    dw 0x0000       ; base 0 to 15 bits
+    db 0x00         ; base 16 to 23 bits
+    
+    db 0x92         ; Access byte
+    db 0xCF         ; Flags + 16 to 19 bits of limit
+
+    db 0x0          ; base 24 to 31 bits
+
+kernel_gdt_end:
+
+kernel_gdt_descriptor:
+
+    dw kernel_gdt_end - kernel_gdt - 1
+    dd kernel_gdt
 
 times 512 - ($ - $$) db 0 ; for alignment
