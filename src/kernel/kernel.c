@@ -24,7 +24,7 @@ void kernel_main(void) {
     enable_paging();
     enable_interrupts();
 
-    print("Kernel Setup finished.\n");
+    print("\nKernel Setup finished.\n");
 
 };
 

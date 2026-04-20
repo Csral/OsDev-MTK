@@ -70,7 +70,7 @@ _start:
     cli
     call kernel_main
 
-    jmp $                 ; just to be sure.
+    ; jmp $                 ; just to be sure.
     cli
     .loop:
         hlt
