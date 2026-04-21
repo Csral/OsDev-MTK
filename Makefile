@@ -1,4 +1,4 @@
-FILES = ./build/kernel.asm.o ./build/kernel.o ./build/idt/idt.asm.o ./build/idt/idt.o ./build/memory/memory.o ./build/io/io.asm.o ./build/memory/heap/heap.o ./build/memory/heap/kheap.o ./build/memory/paging/paging.asm.o ./build/memory/paging/paging.o
+FILES = ./build/kernel.asm.o ./build/kernel.o ./build/idt/idt.asm.o ./build/idt/idt.o ./build/idt/interrupts.asm.o ./build/idt/interrupts.o ./build/memory/memory.o ./build/io/io.asm.o ./build/memory/heap/heap.o ./build/memory/heap/kheap.o ./build/memory/paging/paging.asm.o ./build/memory/paging/paging.o ./build/disk/disk.o ./build/string/string.o ./build/fs/pparser.o
 INCLUDES = -I ./src/kernel/includes
 FLAGS = -g -ffreestanding -nostdlib -falign-jumps -falign-functions -falign-labels -falign-loops -fstrength-reduce -fomit-frame-pointer -finline-functions -Wno-unused-function -fno-builtin -Werror -Wno-unused-label -Wno-cpp -Wno-unused-parameter -nostartfiles -nodefaultlibs -Wall -O0 -Iinc
 
@@ -33,6 +33,12 @@ all: ./bin/boot.bin ./bin/extended.bin ./bin/kernel.bin
 ./build/idt/idt.o: ./src/kernel/idt/idt.c
 	i686-elf-gcc $(INCLUDES) $(FLAGS) -std=gnu99 -c ./src/kernel/idt/idt.c -o ./build/idt/idt.o
 
+./build/idt/interrupts.asm.o: ./src/kernel/idt/idt.asm
+	nasm -f elf -g ./src/kernel/idt/interrupts.asm -o ./build/idt/interrupts.asm.o
+
+./build/idt/interrupts.o: ./src/kernel/idt/interrupts.c
+	i686-elf-gcc $(INCLUDES) $(FLAGS) -std=gnu99 -c ./src/kernel/idt/interrupts.c -o ./build/idt/interrupts.o
+
 ./build/memory/memory.o: ./src/kernel/memory/memory.c
 	i686-elf-gcc $(INCLUDES) $(FLAGS) -std=gnu99 -c ./src/kernel/memory/memory.c -o ./build/memory/memory.o
 
@@ -50,6 +56,15 @@ all: ./bin/boot.bin ./bin/extended.bin ./bin/kernel.bin
 
 ./build/memory/paging/paging.o: ./src/kernel/memory/paging/paging.c
 	i686-elf-gcc $(INCLUDES) $(FLAGS) -std=gnu99 -c ./src/kernel/memory/paging/paging.c -o ./build/memory/paging/paging.o
+
+./build/disk/disk.o: ./src/kernel/disk/disk.c
+	i686-elf-gcc $(INCLUDES) $(FLAGS) -std=gnu99 -c ./src/kernel/disk/disk.c -o ./build/disk/disk.o
+
+./build/fs/pparser.o: ./src/kernel/fs/pparser.c
+	i686-elf-gcc $(INCLUDES) $(FLAGS) -std=gnu99 -c ./src/kernel/fs/pparser.c -o ./build/fs/pparser.o
+
+./build/string/string.o: ./src/kernel/string/string.c
+	i686-elf-gcc $(INCLUDES) $(FLAGS) -std=gnu99 -c ./src/kernel/string/string.c -o ./build/string/string.o
 
 clean:
 	rm -rf ./bin/*.bin
