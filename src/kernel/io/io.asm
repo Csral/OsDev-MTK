@@ -9,14 +9,14 @@ insb:
 
     push ebp
     mov ebp, esp
-    pushad
+    push edx
 
     xor eax, eax
     mov edx, [ebp+8]
 
     in al, dx
 
-    popad
+    pop edx
     mov esp, ebp
     pop ebp
 
@@ -26,14 +26,14 @@ insw:
 
     push ebp
     mov ebp, esp
-    pushad
+    push edx
 
     xor eax, eax
     mov edx, [ebp+8]
 
     in ax, dx
 
-    popad
+    pop edx
     mov esp, ebp
     pop ebp
 
