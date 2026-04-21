@@ -4,6 +4,7 @@
 #include <stdint.h>
 #include "kernel.h"
 #include "config.h"
+#include "interrupts.h"
 
 #define IDT_ENTRY_MASK_GATE_TYPE 0b00001111
 #define IDT_ENTRY_MASK_DPL 0b01100000
@@ -40,26 +41,8 @@ void disable_interrupts(void);
 
 void idt_init(void);
 void idt_set(int interrupt_number, void* addr, uint16_t selector, uint8_t type_attr);
-void int_zero(void);
-void int_gp_fault(uintptr_t address, uint32_t err_code);
-void unhandled_interrupts_handler_basic(void);
-
-/* IRQs */
-void timer_handler(void);
-void int_21_handler(void);
-void no_interrupt_routine_handler(void);
 
 /* Loaders and Handlers from idt.asm */
 extern void idt_load(struct IDTR_Descriptor* ptr);
-
-/* Interrupt handlers */
-extern void idt_int_zero_handler(void);
-extern void idt_20_h(void);
-extern void int_21_h(void);
-extern void general_protection_fault(void);
-
-/* Unhandled interrupts */
-extern void unhandled_interrupts(void);
-extern void no_interrupt_routine(void); // IRQs
 
 #endif
