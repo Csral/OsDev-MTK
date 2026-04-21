@@ -38,7 +38,6 @@ void print(const char* str);
 void print_hex_byte(const uint8_t byte);
 void printc(const char* str, const unsigned char color, const unsigned char bg_color);
 void printint(int num);
-unsigned long int strlen(const char* string);
 
 /* Terminal and VGA Functions */
 unsigned short VGA_make_char(const char ch, const unsigned char color, const unsigned char bg_color);

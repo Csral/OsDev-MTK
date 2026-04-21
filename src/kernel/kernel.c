@@ -5,6 +5,9 @@
 #include "includes/memory/memory.h"
 #include "includes/memory/heap/kheap.h"
 #include "includes/memory/paging/paging.h"
+#include "includes/disk.h"
+#include "includes/string/string.h"
+#include "fs/pparser.h"
 
 unsigned int terminal_x, terminal_y;
 unsigned char terminal_fg_color, terminal_bg_color;
@@ -18,6 +21,7 @@ void kernel_main(void) {
     disable_interrupts();
     terminal_init();
     kheap_init();
+    disk_search_and_init();
     idt_init();
     kernel_paging_chunk = _gen_paging_4gb(PAGING_MASKS_IS_WRITABLE | PAGING_MASKS_IS_PRESENT | PAGING_MASKS_ACCESS_ALL);
     paging_switch(kernel_paging_chunk->d_entry);
@@ -25,6 +29,11 @@ void kernel_main(void) {
     enable_interrupts();
 
     print("\nKernel Setup finished.\n");
+
+    struct path_root* root_path = pparser_parse("0:/test/run.exec", NULL);
+    if (root_path) {
+
+    }
 
 };
 
@@ -88,14 +97,6 @@ void printint(int num) {
         );
         bkp = bkp % divres;
     }
-
-}
-
-unsigned long int strlen(const char* string) {
-
-    unsigned long int length = 0;
-    while (string[length]) length ++;
-    return length;
 
 }
 
