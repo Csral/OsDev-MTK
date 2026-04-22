@@ -1,11 +1,31 @@
 org 0x7c00
 bits 16
 
-_start:
-    jmp short setup
-    nop
+jmp short setup
+nop
 
-times 33 db 0
+; FAT 16 Header
+OEMIdentifier               db  'BasicCOS'
+bytes_per_sector            dw  0x0200
+sectors_per_cluster         db  0x80
+reserved_sectors            dw  200
+num_fat_copies              db  0x02
+root_directory_entries      dw  0x40
+num_sectors                 dw  0x00
+media_type                  db  0xF8
+sectors_per_fat             dw  0x100
+sectors_per_track           dw  0x20
+number_of_heads             dw  0x40
+num_hidden_sectors          dd  0x00
+num_sectors_large           dd  0x773594
+
+; Extended BPB (Dos 4.0)
+drive_number                db  0x80
+WinNTBit                    db  0x00
+signature                   db  0x29
+volume_id                   dd  0xD105
+volume_id_string            db  'BasicOSBooT'
+system_id_string            db  'FAT16   '
 
 setup:
     jmp 0x00:start
