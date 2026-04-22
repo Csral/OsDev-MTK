@@ -23,6 +23,13 @@
 #define HEAP_BASE_ADDRESS 0x01000000
 #define HEAP_TABLE_ADDRESS 0x00007E00
 
+// Disk
+// These both define the same thing.
 #define _DISK_FS_SIZE 0x200U
+#define _DISK_SECTOR_SIZE 0x200U
+
+// File system
+#define MAX_FILESYSTEMS 12U
+#define MAX_FILE_DESCRIPTORS_ACTIVE 512U
 
 #endif
