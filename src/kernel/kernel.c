@@ -8,6 +8,8 @@
 #include "includes/disk.h"
 #include "includes/string/string.h"
 #include "fs/pparser.h"
+#include "disk/streamer.h"
+#include "fs/file.h"
 
 unsigned int terminal_x, terminal_y;
 unsigned char terminal_fg_color, terminal_bg_color;
@@ -21,6 +23,7 @@ void kernel_main(void) {
     disable_interrupts();
     terminal_init();
     kheap_init();
+    fs_init();
     disk_search_and_init();
     idt_init();
     kernel_paging_chunk = _gen_paging_4gb(PAGING_MASKS_IS_WRITABLE | PAGING_MASKS_IS_PRESENT | PAGING_MASKS_ACCESS_ALL);
@@ -30,10 +33,19 @@ void kernel_main(void) {
 
     print("\nKernel Setup finished.\n");
 
-    struct path_root* root_path = pparser_parse("0:/test/run.exec", NULL);
-    if (root_path) {
+    struct disk_stream* stream = diskstreamer_new(0);
+    diskstreamer_seek(stream, 0x290 + 7);
+    char* tester_ch = kzalloc(31);
+    diskstreamer_read(stream, (void*) tester_ch, 31);
+    diskstreamer_close(stream);
 
-    }
+    print(tester_ch);
+
+    char new_ch[50];
+    tester_ch[30] = '\0';
+    strcpy(new_ch, "\nHello - testing the str cpy!\n");
+    print(new_ch);
+    while(1);
 
 };
 
