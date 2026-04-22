@@ -1,4 +1,4 @@
-FILES = ./build/kernel.asm.o ./build/kernel.o ./build/idt/idt.asm.o ./build/idt/idt.o ./build/idt/interrupts.asm.o ./build/idt/interrupts.o ./build/memory/memory.o ./build/io/io.asm.o ./build/memory/heap/heap.o ./build/memory/heap/kheap.o ./build/memory/paging/paging.asm.o ./build/memory/paging/paging.o ./build/disk/disk.o ./build/string/string.o ./build/fs/pparser.o
+FILES = ./build/kernel.asm.o ./build/kernel.o ./build/idt/idt.asm.o ./build/idt/idt.o ./build/idt/interrupts.asm.o ./build/idt/interrupts.o ./build/memory/memory.o ./build/io/io.asm.o ./build/memory/heap/heap.o ./build/memory/heap/kheap.o ./build/memory/paging/paging.asm.o ./build/memory/paging/paging.o ./build/disk/disk.o ./build/string/string.o ./build/fs/pparser.o ./build/disk/streamer.o ./build/fs/file.o ./build/fs/fat/fat16.o
 INCLUDES = -I ./src/kernel/includes
 FLAGS = -g -ffreestanding -nostdlib -falign-jumps -falign-functions -falign-labels -falign-loops -fstrength-reduce -fomit-frame-pointer -finline-functions -Wno-unused-function -fno-builtin -Werror -Wno-unused-label -Wno-cpp -Wno-unused-parameter -nostartfiles -nodefaultlibs -Wall -O0 -Iinc
 
@@ -9,7 +9,12 @@ all: ./bin/boot.bin ./bin/extended.bin ./bin/kernel.bin
 	dd if=./bin/extended.bin >> ./bin/os.bin
 	dd if=./bin/kernel.bin >> ./bin/os.bin
 
-	dd if=/dev/zero bs=512 count=100 >> ./bin/os.bin
+	dd if=/dev/zero bs=1048576 count=16 >> ./bin/os.bin
+
+	sudo mount -t vfat ./bin/os.bin /mnt/OsDevMnt
+	# copy a file over to the bin
+	sudo cp ./message.txt /mnt/OsDevMnt
+	sudo umount /mnt/OsDevMnt
 
 ./bin/kernel.bin: $(FILES)
 	i686-elf-ld -g -relocatable $(FILES) -o ./build/kernelfull.o
@@ -60,8 +65,17 @@ all: ./bin/boot.bin ./bin/extended.bin ./bin/kernel.bin
 ./build/disk/disk.o: ./src/kernel/disk/disk.c
 	i686-elf-gcc $(INCLUDES) $(FLAGS) -std=gnu99 -c ./src/kernel/disk/disk.c -o ./build/disk/disk.o
 
+./build/disk/streamer.o: ./src/kernel/disk/streamer.c
+	i686-elf-gcc $(INCLUDES) $(FLAGS) -std=gnu99 -c ./src/kernel/disk/streamer.c -o ./build/disk/streamer.o
+
 ./build/fs/pparser.o: ./src/kernel/fs/pparser.c
 	i686-elf-gcc $(INCLUDES) $(FLAGS) -std=gnu99 -c ./src/kernel/fs/pparser.c -o ./build/fs/pparser.o
+
+./build/fs/file.o: ./src/kernel/fs/file.c
+	i686-elf-gcc $(INCLUDES) $(FLAGS) -std=gnu99 -c ./src/kernel/fs/file.c -o ./build/fs/file.o
+
+./build/fs/fat/fat16.o: ./src/kernel/fs/fat/fat16.c
+	i686-elf-gcc $(INCLUDES) $(FLAGS) -I./src/fs/fat -std=gnu99 -c ./src/kernel/fs/fat/fat16.c -o ./build/fs/fat/fat16.o
 
 ./build/string/string.o: ./src/kernel/string/string.c
 	i686-elf-gcc $(INCLUDES) $(FLAGS) -std=gnu99 -c ./src/kernel/string/string.c -o ./build/string/string.o
