@@ -21,6 +21,14 @@ unsigned long strnlen(const char* str, unsigned long max_len) {
     return ctr;
 }
 
+char* strcpy(char* dst, const char* src) {
+    char* res = dst;
+    while (*src != 0)
+        *dst++ = *src++;
+    *dst = 0x00; // append the null terminator.
+    return res;
+}
+
 unsigned char isdigit(const char c) {
     return (c > 47) && (c < 58);
 };
