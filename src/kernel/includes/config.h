@@ -14,6 +14,9 @@
 /* Interrupt numbers are free from this point */
 #define IDT_FREE_STARTING_INTERRUPT_NUMBER 0x30
 
+/* GDT */
+#define BasicOS_TOTAL_GDT_SEGMENTS 0x06U
+
 /* Heap - 100MB Heap size. */
 
 #define HEAP_MAX_HEAP_SIZE 104857600U

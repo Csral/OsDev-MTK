@@ -10,6 +10,8 @@
 #include "fs/pparser.h"
 #include "disk/streamer.h"
 #include "fs/file.h"
+#include "gdt/gdt.h"
+#include "task/tss.h"
 
 unsigned int terminal_x, terminal_y;
 unsigned char terminal_fg_color, terminal_bg_color;
@@ -17,6 +19,18 @@ unsigned char terminal_fg_color, terminal_bg_color;
 extern void problem();
 
 static struct paging_4gb_memory_map* kernel_paging_chunk = 0;
+
+struct tss tss;
+
+gdt_entry_t gdt_kernel[BasicOS_TOTAL_GDT_SEGMENTS];
+gdt_entry_st gdt_structured[BasicOS_TOTAL_GDT_SEGMENTS] = {
+    { .base = 0x00, .limit = 0x00, .access_byte = 0x00 },                               // Null Segment
+    { .base = 0x00, .limit = 0xFFFFFFFF, .access_byte = 0x9A },                         // Kernel Code Segment
+    { .base = 0x00, .limit = 0xFFFFFFFF, .access_byte = 0x92 },                         // Kernel Data Segment
+    { .base = 0x00, .limit = 0xFFFFFFFF, .access_byte = 0xF8 },                         // User Code Segment
+    { .base = 0x00, .limit = 0xFFFFFFFF, .access_byte = 0xF2 },                         // User Data Segment
+    { .base = (size_t) &tss, .limit = sizeof(tss), .access_byte = 0xE9 }                // TSS Segment
+};
 
 void kernel_main(void) {
 
@@ -26,6 +40,17 @@ void kernel_main(void) {
     fs_init();
     disk_search_and_init();
     idt_init();
+
+    memset(gdt_kernel, 0x00, sizeof(gdt_kernel));
+    unpack_structured_gdt(gdt_structured, gdt_kernel, BasicOS_TOTAL_GDT_SEGMENTS);
+    gdt_load(gdt_kernel, sizeof(gdt_kernel));
+
+    memset(&tss, 0x00, sizeof(tss));
+    tss.esp0 = 0x600000;
+    tss.ss0 = KERNEL_DATA_SELECTOR;
+
+    tss_load(0x28);         // 0x28 is offset in gdt_kernel.
+    
     kernel_paging_chunk = _gen_paging_4gb(PAGING_MASKS_IS_WRITABLE | PAGING_MASKS_IS_PRESENT | PAGING_MASKS_ACCESS_ALL);
     paging_switch(kernel_paging_chunk->d_entry);
     enable_paging();
