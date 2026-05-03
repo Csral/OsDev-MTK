@@ -8,6 +8,7 @@
 #include "memory/memory.h"
 #include "memory/heap/kheap.h"
 #include "disk.h"
+#include "kernel.h"
 #include <stdint.h>
 
 #define BasicOS_FAT16_signature 0x29
@@ -91,14 +92,14 @@ struct fat_item {
 
     union {
         struct fat_directory_item* item;        // file
-        struct fat_directory_item* directory;   // directory
+        struct fat_directory* directory;   // directory
     };
 
     fat_item_t type;
 
 };
 
-struct fat_item_descriptor {
+struct fat_file_descriptor {
     struct fat_item* item;
     unsigned long pos;
 };
@@ -114,9 +115,6 @@ struct fat_private {
     // Directory streamer
     struct disk_stream* directory_stream;
 };
-
-unsigned char fat16_resolve(struct disk* disk);
-void* fat16_open(struct disk* disk, struct path_part* path, FILE_MODE mode);
 
 struct filesystem* fat16_init();
 
