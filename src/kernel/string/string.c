@@ -21,6 +21,54 @@ unsigned long strnlen(const char* str, unsigned long max_len) {
     return ctr;
 }
 
+int strncmp(const char* str1, const char* str2, unsigned long size) {
+    unsigned char t1, t2;
+
+    while (size-- > 0) {
+        t1 = (unsigned char) *str1++;
+        t2 = (unsigned char) *str2++;
+
+        if (t1 != t2) return (t1 - t2);
+        if (t1 == '\0') return 0;
+
+    }
+
+    return 0;
+
+}
+
+unsigned char tolower(unsigned char ch) {
+    
+    if (ch < 65 || ch > 90) return ch;
+    else return (ch + 32);
+}
+
+int istrncmp(const char* str1, const char* str2, unsigned long max) {
+    unsigned char u1, u2;
+
+    while (max-->0) {
+
+        u1 = (unsigned char) *str1++;
+        u2 = (unsigned char) *str2++;
+
+        if (u1 != u2 && tolower(u1) != tolower(u2)) return u1 - u2;
+        if (u1 == '\0') return 0;
+
+    }
+
+    return 0;
+}
+
+unsigned long strnlen_terminator(const char* str, unsigned long max, const char terminator) {
+    
+    unsigned long i = 0;
+    for (i = 0; i < max; i++)
+        if (str[i] == '\0' || str[i] == terminator) break;
+
+    return i;
+
+}
+
 char* strcpy(char* dst, const char* src) {
     char* res = dst;
     while (*src != 0)
