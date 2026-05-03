@@ -7,5 +7,8 @@
 #define ENOMEM 3
 #define EBADPATH 4
 #define EFSNOTSUPPORTED 5
+#define ERDONLY 6
+
+#define EUNIMP 7
 
 #endif

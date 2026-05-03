@@ -30,6 +30,10 @@
 #define TEXT_MODE_VGA_WIDTH 80
 #define TEXT_MODE_VGA_HEIGHT 20
 
+#define ERROR(V) ((void*) V)
+#define ERROR_I(V) ((int)(V))
+#define IS_ERR(V) (((int)V) < 0)
+
 /* Kernel Functions */
 void kernel_main(void);
 
