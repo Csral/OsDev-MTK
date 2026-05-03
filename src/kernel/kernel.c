@@ -33,18 +33,16 @@ void kernel_main(void) {
 
     print("\nKernel Setup finished.\n");
 
-    struct disk_stream* stream = diskstreamer_new(0);
-    diskstreamer_seek(stream, 0x290 + 7);
-    char* tester_ch = kzalloc(31);
-    diskstreamer_read(stream, (void*) tester_ch, 31);
-    diskstreamer_close(stream);
+    int fd = fopen("0:/message.txt", "r");
+    (fd == 0) ? print((const char*) 48 + fd) : printint(fd);
+    if (fd) {
+        struct file_stat s;
+        fstat(fd, &s);
 
-    print(tester_ch);
+        fclose(fd);
+        print("\nClosed message.txt\n");
+    }
 
-    char new_ch[50];
-    tester_ch[30] = '\0';
-    strcpy(new_ch, "\nHello - testing the str cpy!\n");
-    print(new_ch);
     while(1);
 
 };
