@@ -11,4 +11,7 @@
 
 #define EUNIMP 7
 
+#define EPID_ISTKN 8
+#define EPROC_NOMEM 9
+
 #endif
