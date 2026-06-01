@@ -36,8 +36,8 @@ struct IDTR_Descriptor {
 
 } __attribute__((packed)) ;
 
-void enable_interrupts(void);
-void disable_interrupts(void);
+extern void enable_interrupts(void);
+extern void disable_interrupts(void);
 
 void idt_init(void);
 void idt_set(int interrupt_number, void* addr, uint16_t selector, uint8_t type_attr);
