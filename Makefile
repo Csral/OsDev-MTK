@@ -1,8 +1,8 @@
-FILES = ./build/kernel.asm.o ./build/kernel.o ./build/gdt/gdt.asm.o ./build/gdt/gdt.o ./build/idt/idt.asm.o ./build/idt/idt.o ./build/idt/interrupts.asm.o ./build/idt/interrupts.o ./build/memory/memory.o ./build/task/tss.asm.o ./build/io/io.asm.o ./build/memory/heap/heap.o ./build/memory/heap/kheap.o ./build/memory/paging/paging.asm.o ./build/memory/paging/paging.o ./build/disk/disk.o ./build/string/string.o ./build/fs/pparser.o ./build/disk/streamer.o ./build/fs/file.o ./build/fs/fat/fat16.o
+FILES = ./build/kernel.asm.o ./build/kernel.o ./build/gdt/gdt.asm.o ./build/gdt/gdt.o ./build/idt/idt.asm.o ./build/idt/idt.o ./build/idt/interrupts.asm.o ./build/idt/interrupts_ext.asm.o ./build/idt/interrupts.o ./build/memory/memory.o ./build/task/task.o ./build/task/task.asm.o ./build/task/tss.asm.o ./build/task/process.o ./build/io/io.asm.o ./build/memory/heap/heap.o ./build/memory/heap/kheap.o ./build/memory/paging/paging.asm.o ./build/memory/paging/paging.o ./build/disk/disk.o ./build/string/string.o ./build/fs/pparser.o ./build/disk/streamer.o ./build/fs/file.o ./build/fs/fat/fat16.o
 INCLUDES = -I ./src/kernel/includes
 FLAGS = -g -ffreestanding -nostdlib -falign-jumps -falign-functions -falign-labels -falign-loops -fstrength-reduce -fomit-frame-pointer -finline-functions -Wno-unused-function -fno-builtin -Werror -Wno-unused-label -Wno-cpp -Wno-unused-parameter -nostartfiles -nodefaultlibs -Wall -O0 -Iinc
 
-all: ./bin/boot.bin ./bin/extended.bin ./bin/kernel.bin
+all: ./bin/boot.bin ./bin/extended.bin ./bin/kernel.bin user_programs
 
 	rm -rf ./bin/os.bin
 	dd if=./bin/boot.bin >> ./bin/os.bin
@@ -14,6 +14,9 @@ all: ./bin/boot.bin ./bin/extended.bin ./bin/kernel.bin
 	sudo mount -t vfat ./bin/os.bin /mnt/OsDevMnt
 	# copy a file over to the bin
 	sudo cp ./message.txt /mnt/OsDevMnt
+	# Load user program
+	sudo cp ./programs/blank/blank.bin /mnt/OsDevMnt
+
 	sudo umount /mnt/OsDevMnt
 
 ./bin/kernel.bin: $(FILES)
@@ -44,8 +47,11 @@ all: ./bin/boot.bin ./bin/extended.bin ./bin/kernel.bin
 ./build/idt/idt.o: ./src/kernel/idt/idt.c
 	i686-elf-gcc $(INCLUDES) $(FLAGS) -std=gnu99 -c ./src/kernel/idt/idt.c -o ./build/idt/idt.o
 
-./build/idt/interrupts.asm.o: ./src/kernel/idt/idt.asm
+./build/idt/interrupts.asm.o: ./src/kernel/idt/interrupts.asm
 	nasm -f elf -g ./src/kernel/idt/interrupts.asm -o ./build/idt/interrupts.asm.o
+
+./build/idt/interrupts_ext.asm.o: ./src/kernel/idt/interrupts_ext.asm
+	nasm -f elf -g ./src/kernel/idt/interrupts_ext.asm -o ./build/idt/interrupts_ext.asm.o
 
 ./build/idt/interrupts.o: ./src/kernel/idt/interrupts.c
 	i686-elf-gcc $(INCLUDES) $(FLAGS) -std=gnu99 -c ./src/kernel/idt/interrupts.c -o ./build/idt/interrupts.o
@@ -55,6 +61,15 @@ all: ./bin/boot.bin ./bin/extended.bin ./bin/kernel.bin
 
 ./build/task/tss.asm.o: ./src/kernel/task/tss.asm
 	nasm -f elf -g ./src/kernel/task/tss.asm -o ./build/task/tss.asm.o
+
+./build/task/task.o: ./src/kernel/task/task.c
+	i686-elf-gcc $(INCLUDES) $(FLAGS) -std=gnu99 -c ./src/kernel/task/task.c -o ./build/task/task.o
+
+./build/task/task.asm.o: ./src/kernel/task/task.asm
+	nasm -f elf -g ./src/kernel/task/task.asm -o ./build/task/task.asm.o
+
+./build/task/process.o: ./src/kernel/task/process.c
+	i686-elf-gcc $(INCLUDES) $(FLAGS) -std=gnu99 -c ./src/kernel/task/process.c -o ./build/task/process.o
 
 ./build/io/io.asm.o: ./src/kernel/io/io.asm
 	nasm -f elf -g ./src/kernel/io/io.asm -o ./build/io/io.asm.o
@@ -89,7 +104,13 @@ all: ./bin/boot.bin ./bin/extended.bin ./bin/kernel.bin
 ./build/string/string.o: ./src/kernel/string/string.c
 	i686-elf-gcc $(INCLUDES) $(FLAGS) -std=gnu99 -c ./src/kernel/string/string.c -o ./build/string/string.o
 
-clean:
+user_programs:
+	cd ./programs/blank && $(MAKE) all
+
+user_programs_clean:
+	cd ./programs/blank && $(MAKE) clean
+
+clean: user_programs_clean
 	rm -rf ./bin/*.bin
 	rm -rf ${FILES}
 	rm -rf ./build/kernelfull.o
