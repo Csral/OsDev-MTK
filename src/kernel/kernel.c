@@ -9,9 +9,12 @@
 #include "includes/string/string.h"
 #include "fs/pparser.h"
 #include "disk/streamer.h"
+#include "status.h"
 #include "fs/file.h"
 #include "gdt/gdt.h"
 #include "task/tss.h"
+#include "task/task.h"
+#include "task/process.h"
 
 unsigned int terminal_x, terminal_y;
 unsigned char terminal_fg_color, terminal_bg_color;
@@ -54,20 +57,17 @@ void kernel_main(void) {
     kernel_paging_chunk = _gen_paging_4gb(PAGING_MASKS_IS_WRITABLE | PAGING_MASKS_IS_PRESENT | PAGING_MASKS_ACCESS_ALL);
     paging_switch(kernel_paging_chunk->d_entry);
     enable_paging();
-    enable_interrupts();
 
-    print("\nKernel Setup finished.\n");
-
-    int fd = fopen("0:/message.txt", "r");
-    (fd == 0) ? print((const char*) 48 + fd) : printint(fd);
-    if (fd) {
-        struct file_stat s;
-        fstat(fd, &s);
-
-        fclose(fd);
-        print("\nClosed message.txt\n");
+    print("Kernel Setup finished.\n");
+    struct process* process = 0;
+    int res = process_load("0:/blank.bin", &process);
+    if (res != NE) {
+        kernel_panic("Failed to load blank.bin");
     }
 
+    task_run_first_task();
+
+    enable_interrupts();
     while(1);
 
 };
