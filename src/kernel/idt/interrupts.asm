@@ -51,18 +51,12 @@ invalid_opcode_fault_handler:
 
 general_protection_fault:
 
-    push ebp
-    mov ebp, esp
     pushad
-
-    push [ebp] ; err_code
-    push [ebp+4] ; EIP of faulting instruction
+    mov eax, esp
+    push eax
     call int_gp_fault
-    add esp, 8
-    
+    add esp, 4
     popad
-    mov esp, ebp
-    pop ebp
     add esp, 4          ; Pop the ERR_CODE out of stack
     
     iret

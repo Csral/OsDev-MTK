@@ -24,4 +24,3 @@ idt_load:
     lidt [ebx]
     pop ebp
     ret
-    

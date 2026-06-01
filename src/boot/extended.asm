@@ -35,7 +35,7 @@ load_protected:
     or al, 1
     mov cr0, eax
 
-    jmp CODE_SEG:pModeMain 
+    jmp CODE_SEG:pModeMain
 
 print:
 

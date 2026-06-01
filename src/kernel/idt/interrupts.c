@@ -8,19 +8,26 @@ void idt_invalid_opcode_fault_handler(void) {
     kernel_panic("\nUndefined instruction (or reserved op-code) executed.\n");
 }
 
-void int_gp_fault(unsigned long address, uint32_t err_code) {
+void int_gp_fault(struct GP_Handler_stack* stack_frame) {
     terminal_clear();
-    print("General Protection Fault (#GP) raised at address: ");
-    printint(address);
+    print("General Protection Fault (#GP).");
+    print("\nRaised at address: ");
+    printint(stack_frame->eip);
     print("\nError Code: ");
-    printint(err_code);
+    printint(stack_frame->err_code);
     print("\n INS:");
 
     for (uint8_t i = 0; i < 8; i++) {
-        print_hex_byte(*((uint8_t*) address + i));
+        print_hex_byte(*((uint8_t*) stack_frame->eip + i));
     }
 
-    kernel_panic("\nCPU Halted.");
+    print("\nProcessor CS value: ");
+    printint(stack_frame->cs);
+
+    print("\nProcessor eflags: ");
+    printint(stack_frame->eflags);
+
+    kernel_panic("CPU Halted.");
 
 }
 
