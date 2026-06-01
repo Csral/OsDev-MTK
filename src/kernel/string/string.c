@@ -77,6 +77,17 @@ char* strcpy(char* dst, const char* src) {
     return res;
 }
 
+char* strncpy(char* dst, const char* src, unsigned long size) {
+    char* res = dst;
+    
+    if (size == 0) return res;
+    
+    while (--size > 0 && *src)
+        *dst++ = *src++;
+    *dst = 0x00; // append the null terminator.
+    return res;
+}
+
 unsigned char isdigit(const char c) {
     return (c > 47) && (c < 58);
 };
