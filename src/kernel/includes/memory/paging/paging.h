@@ -23,7 +23,13 @@ struct paging_4gb_memory_map {
 
 extern void enable_paging(void);
 struct paging_4gb_memory_map* _gen_paging_4gb(unsigned char flags);
+void paging_free_4gb(struct paging_4gb_memory_map* page);
 void paging_switch(uint32_t* p_directory);
 int paging_set(uint32_t* directory, void* v_addr, uint32_t val);
+int paging_map(uint32_t* directory, void* v_addr, void* p_addr, int flags);
+int paging_map_range(uint32_t* directory, void* v_addr, void* p_addr, unsigned long count, int flags);
+int paging_map_to(uint32_t* directory, void* v_addr, void* p_addr, void* p_addr_end, int flags);
+
+unsigned long paging_align_address(unsigned long addr);
 
 #endif

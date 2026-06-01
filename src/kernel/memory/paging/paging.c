@@ -31,6 +31,16 @@ struct paging_4gb_memory_map* _gen_paging_4gb(unsigned char flags) {
 
 };
 
+void paging_free_4gb(struct paging_4gb_memory_map* page) {
+    for (int i = 0; i < 0x400U; i++) {
+        uint32_t entry = page->d_entry[i];
+        uint32_t* table = (uint32_t*)(entry & 0xFFFFF000);
+        kfree(table);
+    }
+    kfree(page->d_entry);
+    kfree(page);
+}
+
 void paging_switch(uint32_t* p_directory) {
     paging_load_directory(p_directory);
     current_directory = p_directory;
@@ -42,6 +52,10 @@ inline __attribute__((__always_inline__)) uint32_t* paging_4gb_get_directory_ref
 
 inline __attribute__((__always_inline__)) uint8_t paging_is_aligned(void* addr) {
     return ( (unsigned long) addr % PAGING_PAGE_SIZE == 0);
+}
+
+inline unsigned long paging_align_address(unsigned long addr) {
+    return (addr % PAGING_PAGE_SIZE) ? ( addr + ( PAGING_PAGE_SIZE - (addr % PAGING_PAGE_SIZE)) ) : addr;
 }
 
 int paging_get_indexes(void* virtual_address, uint32_t* directory_index_out, uint32_t* table_index_out) {
@@ -82,6 +96,48 @@ int paging_set(uint32_t* directory, void* v_addr, uint32_t val) {
     uint32_t entry = directory[d_index];
     uint32_t* table = (uint32_t*) (entry & 0xFFFFF000);
     table[t_index] = val;
+
+    out:
+    return res;
+
+}
+
+int paging_map(uint32_t* directory, void* v_addr, void* p_addr, int flags) {
+    if (((unsigned long) v_addr % PAGING_PAGE_SIZE) || ((unsigned long) p_addr % PAGING_PAGE_SIZE)) return -EINVARG;
+    return paging_set(directory, v_addr, ((unsigned long) p_addr) | flags);
+}
+
+int paging_map_range(uint32_t* directory, void* v_addr, void* p_addr, unsigned long count, int flags) {
+
+    int res = 0;
+    for (unsigned long i = 0; i < count; i++) {
+        res = paging_map(directory, v_addr, p_addr, flags);
+        if (res == 0) break;
+
+        v_addr += PAGING_PAGE_SIZE;
+        p_addr += PAGING_PAGE_SIZE;
+    }
+
+    return res;
+
+}
+
+int paging_map_to(uint32_t* directory, void* v_addr, void* p_addr, void* p_addr_end, int flags) {
+
+    int res = 0;
+    if (
+        ((unsigned long) v_addr % PAGING_PAGE_SIZE) ||
+        ((unsigned long) p_addr % PAGING_PAGE_SIZE) ||
+        ((unsigned long) p_addr_end % PAGING_PAGE_SIZE) ||
+        ((unsigned long) p_addr_end < (unsigned long) p_addr)
+    ) {
+        res = -EINVARG;
+        goto out;
+    }
+
+    uint32_t total_bytes = p_addr_end - p_addr;
+    uint32_t total_pages = total_bytes / PAGING_PAGE_SIZE;
+    res = paging_map_range(directory, v_addr, p_addr, total_pages, flags);
 
     out:
     return res;
