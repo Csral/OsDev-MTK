@@ -15,6 +15,7 @@
 #include "task/tss.h"
 #include "task/task.h"
 #include "task/process.h"
+#include "keyboard/keyboard.h"
 
 #include "isr80h/isr80h.h"
 
@@ -69,6 +70,8 @@ void kernel_main(void) {
     enable_paging();
     // register all syscalls
     isr80h_register_commands();
+    // initialize all system keyboards.
+    keyboard_init();
 
     print("Kernel Setup finished.\n");
 

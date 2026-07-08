@@ -54,4 +54,7 @@
 #define BasicOS_MAX_ALLOCATIONS_ALLOWED_PER_PROCESS 0x400U
 #define BasicOS_MAX_PROCESSES 0xCU
 
+/* Keyboard */
+#define BasicOS_KEYBOARD_BUFFER_SIZE 0x400
+
 #endif

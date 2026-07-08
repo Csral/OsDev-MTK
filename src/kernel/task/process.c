@@ -15,7 +15,7 @@ static void process_init(struct process* process) {
     memset(process, 0, sizeof(struct process));
 }
 
-inline struct process* get_current_process(void) {
+struct process* get_current_process(void) {
     return current_process;
 }
 
