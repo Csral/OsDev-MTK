@@ -10,6 +10,8 @@ global int_21_h
 global unhandled_interrupts
 global no_interrupt_routine
 
+global isr80h_wrapper
+
 ; 32-bit Kernel Handler functions
 extern int_zero
 extern idt_invalid_opcode_fault_handler
@@ -18,6 +20,7 @@ extern int_21_handler
 extern int_gp_fault
 extern unhandled_interrupts_handler_basic
 extern no_interrupt_routine_handler
+extern isr80h_handler
 
 idt_int_zero_handler:
 
@@ -129,3 +132,37 @@ no_interrupt_routine:
 
     sti
     iret
+
+
+isr80h_wrapper:
+
+    cli
+    
+    ; IA-32 mode stack after priv. change
+    ; IP
+    ; CS
+    ; FLAGS
+    ; SP
+    ; SS
+
+    ; append registers on them 
+    pushad
+
+    ; push interrupt frame.
+    push esp
+    ; syscall ID
+    push eax
+
+    call isr80h_handler
+    mov dword[tmp_res], eax
+    add esp, 8
+    
+    ; get back the registers of process
+    popad
+
+    mov eax, [tmp_res]
+    iretd
+
+section .data
+; Temp register to store return value from isr80h_handler
+tmp_res: dd 0
