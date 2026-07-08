@@ -1,9 +1,12 @@
 #include "task/task.h"
 #include "memory/memory.h"
+#include "memory/paging/paging.h"
 #include "memory/heap/kheap.h"
 #include "kernel.h"
 #include "status.h"
 #include "task/process.h"
+#include "string/string.h"
+#include "interrupts.h"
 
 struct task* current_task = 0;
 
@@ -103,10 +106,88 @@ int task_switch(struct task* task) {
 
 }
 
+static inline void task_save_state(struct task* task, struct interrupt_frame* frame) {
+
+    task->registers.eip = frame->eip;
+    task->registers.cs = frame->cs;
+    task->registers.eflags = frame->eflags;
+    task->registers.esp = frame->esp;
+    task->registers.ss = frame->ss;
+    task->registers.eax = frame->eax;
+    task->registers.ebp = frame->ebp;
+    task->registers.ebx = frame->ebx;
+    task->registers.ecx = frame->ecx;
+    task->registers.edi = frame->edi;
+    task->registers.edx = frame->edx;
+    task->registers.esi = frame->esi;
+
+};
+
+int copy_string_from_task(struct task* task, void* virtual, void* physical, int max) {
+
+    // Kernel page needs to be active
+
+    if (max >= PAGING_PAGE_SIZE) {
+        return -EINVARG;
+    }
+
+    int res = 0;
+    char* tmp = kzalloc(max);
+
+    if (!tmp) {
+        res = -ENOMEM;
+        goto out;
+    }
+
+    uint32_t* task_directory = task->page_directory->d_entry;
+    uint32_t old_entry = paging_get(task_directory, tmp);
+
+    paging_map(task->page_directory, tmp, tmp, PAGING_MASKS_IS_WRITABLE | PAGING_MASKS_IS_PRESENT | PAGING_MASKS_ACCESS_ALL);
+    paging_switch(task->page_directory);
+
+    strncpy(tmp, virtual, max);
+    kernel_page();
+    
+    res = paging_set(task_directory, tmp, old_entry);
+
+    if (res < 0) {
+        res = -EIO;
+        goto out_free;
+    }
+
+    strncpy(physical, tmp, max);
+
+    out_free:
+    kfree(tmp);
+
+    out:
+    return res;
+
+};
+
+void task_current_save_state(struct interrupt_frame* frame) {
+
+    // Kernel page needs to be active
+    struct task* task = task_current();
+    if (!task) {
+        kernel_panic("No task to save!\n");
+    }
+
+    task_save_state(task, frame);
+
+}
+
 int task_page() {
     user_registers();
     task_switch(current_task);
     return 0;
+}
+
+void task_page_task(struct task* task) {
+
+    user_registers();
+    paging_switch(task->page_directory);
+    
 }
 
 void task_run_first_task(void) {
@@ -118,5 +199,20 @@ void task_run_first_task(void) {
 
     task_switch(task_head);
     task_return(&task_head->registers);
+
+}
+
+void* task_get_stack_item(struct task* task, int idx) {
+
+    // Must be in kernel page
+    void* result = 0;
+
+    uint32_t* sp_ptr = (uint32_t*) task->registers.esp;
+    // switch to this specific task's page.
+    task_page_task(task);
+    result = (void*) sp_ptr[idx];
+    kernel_page();
+
+    return result;
 
 }

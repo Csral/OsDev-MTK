@@ -85,6 +85,19 @@ int process_map_memory(struct process* process) {
 
     int res = 0;
     res = process_map_binary(process);
+
+    if (res < 0) {
+        goto out;
+    }
+
+    paging_map_to(process->task->page_directory,
+        (void*) BKE_TASK_PROGRAM_VIRTUAL_STACK_ADDR_END,
+        process->stack,
+        (void*) paging_align_address( ((unsigned long) process->stack) + BKE_TASK_USER_STACK_SIZE),
+        PAGING_MASKS_IS_PRESENT | PAGING_MASKS_ACCESS_ALL | PAGING_MASKS_IS_WRITABLE
+    );
+
+    out:
     return res;
 }
 

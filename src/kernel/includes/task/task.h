@@ -13,6 +13,7 @@
 typedef uint32_t __rs; //* register size
 #endif
 
+struct interrupt_frame;
 struct registers {
     __rs edi;
     __rs esi;
@@ -47,6 +48,10 @@ int task_page();
 struct task* task_get_next();
 
 void task_run_first_task(void);
+void task_current_save_state(struct interrupt_frame* frame);
+int copy_string_from_task(struct task* task, void* virtual, void* physical, int max);
+void* task_get_stack_item(struct task* task, int idx);
+void task_page_task(struct task* task);
 
 extern void task_return(struct registers* regs);
 extern void restore_general_purpose_registers(struct registers* regs);

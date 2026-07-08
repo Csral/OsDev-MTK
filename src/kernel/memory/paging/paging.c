@@ -112,7 +112,7 @@ int paging_map_range(struct paging_4gb_memory_map* directory, void* v_addr, void
     int res = 0;
     for (unsigned long i = 0; i < count; i++) {
         res = paging_map(directory, v_addr, p_addr, flags);
-        if (res == 0) break;
+        if (res < 0) break;
 
         v_addr += PAGING_PAGE_SIZE;
         p_addr += PAGING_PAGE_SIZE;
@@ -141,5 +141,19 @@ int paging_map_to(struct paging_4gb_memory_map* directory, void* v_addr, void* p
 
     out:
     return res;
+
+}
+
+uint32_t paging_get(uint32_t* directory, void* v_addr) {
+
+    // phy addr with flags of v_addr
+
+    uint32_t directory_index = 0;
+    uint32_t table_index = 0;
+    paging_get_indexes(v_addr, &directory_index, &table_index);
+    uint32_t entry = directory[directory_index];
+    uint32_t* table = (uint32_t*) (entry & 0xFFFFF000);
+
+    return table[table_index];
 
 }
