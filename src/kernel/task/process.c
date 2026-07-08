@@ -68,7 +68,7 @@ static int process_load_data(const char* filename, struct process* process) {
 int process_map_binary(struct process* process) {
     int res = 0;
 
-    paging_map_to(process->task->page_directory->d_entry,
+    paging_map_to(process->task->page_directory,
         (void*) BKE_TASK_PROGRAM_VIRTUAL_ADDR,
         process->ptr,
         (void*) paging_align_address( ((unsigned long) process->ptr) + process->size),

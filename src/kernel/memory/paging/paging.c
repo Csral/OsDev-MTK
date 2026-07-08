@@ -41,9 +41,9 @@ void paging_free_4gb(struct paging_4gb_memory_map* page) {
     kfree(page);
 }
 
-void paging_switch(uint32_t* p_directory) {
-    paging_load_directory(p_directory);
-    current_directory = p_directory;
+void paging_switch(struct paging_4gb_memory_map* page) {
+    paging_load_directory(page->d_entry);
+    current_directory = page->d_entry;
 }
 
 inline __attribute__((__always_inline__)) uint32_t* paging_4gb_get_directory_ref(struct paging_4gb_memory_map* pconf) {
@@ -102,12 +102,12 @@ int paging_set(uint32_t* directory, void* v_addr, uint32_t val) {
 
 }
 
-int paging_map(uint32_t* directory, void* v_addr, void* p_addr, int flags) {
+int paging_map(struct paging_4gb_memory_map* directory, void* v_addr, void* p_addr, int flags) {
     if (((unsigned long) v_addr % PAGING_PAGE_SIZE) || ((unsigned long) p_addr % PAGING_PAGE_SIZE)) return -EINVARG;
-    return paging_set(directory, v_addr, ((unsigned long) p_addr) | flags);
+    return paging_set(directory->d_entry, v_addr, ((unsigned long) p_addr) | flags);
 }
 
-int paging_map_range(uint32_t* directory, void* v_addr, void* p_addr, unsigned long count, int flags) {
+int paging_map_range(struct paging_4gb_memory_map* directory, void* v_addr, void* p_addr, unsigned long count, int flags) {
 
     int res = 0;
     for (unsigned long i = 0; i < count; i++) {
@@ -122,7 +122,7 @@ int paging_map_range(uint32_t* directory, void* v_addr, void* p_addr, unsigned l
 
 }
 
-int paging_map_to(uint32_t* directory, void* v_addr, void* p_addr, void* p_addr_end, int flags) {
+int paging_map_to(struct paging_4gb_memory_map* directory, void* v_addr, void* p_addr, void* p_addr_end, int flags) {
 
     int res = 0;
     if (

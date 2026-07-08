@@ -55,7 +55,7 @@ void kernel_main(void) {
     tss_load(0x28);         // 0x28 is offset in gdt_kernel.
     
     kernel_paging_chunk = _gen_paging_4gb(PAGING_MASKS_IS_WRITABLE | PAGING_MASKS_IS_PRESENT | PAGING_MASKS_ACCESS_ALL);
-    paging_switch(kernel_paging_chunk->d_entry);
+    paging_switch(kernel_paging_chunk);
     enable_paging();
 
     print("Kernel Setup finished.\n");
