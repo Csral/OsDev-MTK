@@ -35,6 +35,8 @@
 #define IS_ERR(V) (((int)V) < 0)
 
 /* Kernel Functions */
+extern void kernel_registers(void);
+extern void kernel_page(void);
 void kernel_main(void);
 
 /* Utilities */

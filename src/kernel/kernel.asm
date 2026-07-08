@@ -3,6 +3,7 @@
 global _start
 global problem
 global __panic
+global kernel_registers
 extern kernel_main
 
 CODE_SEG equ 0x08
@@ -75,6 +76,15 @@ _start:
     .loop:
         hlt
         jmp .loop
+
+kernel_registers:
+    mov ax, DATA_SEG
+    mov ds, ax
+    mov es, ax
+    mov fs, ax
+    mov gs, ax
+    mov ss, ax
+    ret
 
 __panic:
 

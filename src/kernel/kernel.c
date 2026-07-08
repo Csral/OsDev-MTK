@@ -16,6 +16,8 @@
 #include "task/task.h"
 #include "task/process.h"
 
+#include "isr80h/isr80h.h"
+
 unsigned int terminal_x, terminal_y;
 unsigned char terminal_fg_color, terminal_bg_color;
 
@@ -34,6 +36,14 @@ gdt_entry_st gdt_structured[BasicOS_TOTAL_GDT_SEGMENTS] = {
     { .base = 0x00, .limit = 0xFFFFFFFF, .access_byte = 0xF2 },                         // User Data Segment
     { .base = (size_t) &tss, .limit = sizeof(tss), .access_byte = 0xE9 }                // TSS Segment
 };
+
+void kernel_page(void) {
+
+    kernel_registers();
+    paging_switch(kernel_paging_chunk);
+    return;
+
+}
 
 void kernel_main(void) {
 
@@ -57,8 +67,14 @@ void kernel_main(void) {
     kernel_paging_chunk = _gen_paging_4gb(PAGING_MASKS_IS_WRITABLE | PAGING_MASKS_IS_PRESENT | PAGING_MASKS_ACCESS_ALL);
     paging_switch(kernel_paging_chunk);
     enable_paging();
+    // register all syscalls
+    isr80h_register_commands();
 
     print("Kernel Setup finished.\n");
+
+    // clean terminal
+    terminal_clear();
+
     struct process* process = 0;
     int res = process_load("0:/blank.bin", &process);
     if (res != NE) {
