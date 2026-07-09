@@ -133,6 +133,11 @@ void printint(int num) {
         num *= -1;
     }
 
+    if (num == 0) {
+        terminal_puts('0');
+        return;
+    }
+
     int32_t bkp = num;
     size_t num_len = 0;
     long int divres = 0;
