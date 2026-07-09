@@ -46,6 +46,10 @@ void kernel_page(void) {
 
 }
 
+void pic_timer_callback(struct interrupt_frame* frame) {
+    print("Timer activated!");
+}
+
 void kernel_main(void) {
 
     disable_interrupts();
@@ -72,6 +76,8 @@ void kernel_main(void) {
     isr80h_register_commands();
     // initialize all system keyboards.
     keyboard_init();
+
+    idt_register_interrupt_callback(0x20, pic_timer_callback);
 
     print("Kernel Setup finished.\n");
 

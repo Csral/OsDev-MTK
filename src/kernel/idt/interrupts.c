@@ -12,7 +12,7 @@ void idt_invalid_opcode_fault_handler(void) {
     kernel_panic("\nUndefined instruction (or reserved op-code) executed.\n");
 }
 
-void int_gp_fault(struct GP_Handler_stack* stack_frame) {
+void int_gp_fault(struct interrupt_frame* stack_frame) {
     terminal_clear();
     print("General Protection Fault (#GP).");
     print("\nRaised at address: ");
@@ -40,11 +40,6 @@ void unhandled_interrupts_handler_basic(void) {
 }
 
 void timer_handler(void) {
-    _ACK_IRQ_EOI
-}
-
-void int_21_handler(void) {
-    print("\nKeyboard pressed!\n");
     _ACK_IRQ_EOI
 }
 

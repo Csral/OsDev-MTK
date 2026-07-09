@@ -39,6 +39,8 @@ struct IDTR_Descriptor {
 extern void enable_interrupts(void);
 extern void disable_interrupts(void);
 
+int idt_register_interrupt_callback(int interrupt_id, INTERRUPT_CALLBACK_FUNCTION callback);
+
 void idt_init(void);
 void idt_set(int interrupt_number, void* addr, uint16_t selector, uint8_t type_attr);
 

@@ -3,24 +3,22 @@ section .asm
 
 global idt_int_zero_handler
 global invalid_opcode_fault_handler
-global general_protection_fault
 
-global idt_20_h
-global int_21_h
 global unhandled_interrupts
 global no_interrupt_routine
 
 global isr80h_wrapper
 
+global interrupt_pointer_table
+
 ; 32-bit Kernel Handler functions
 extern int_zero
 extern idt_invalid_opcode_fault_handler
-extern timer_handler
-extern int_21_handler
-extern int_gp_fault
 extern unhandled_interrupts_handler_basic
 extern no_interrupt_routine_handler
 extern isr80h_handler
+
+extern interrupt_handler
 
 idt_int_zero_handler:
 
@@ -52,18 +50,6 @@ invalid_opcode_fault_handler:
 
     iret
 
-general_protection_fault:
-
-    pushad
-    mov eax, esp
-    push eax
-    call int_gp_fault
-    add esp, 4
-    popad
-    add esp, 4          ; Pop the ERR_CODE out of stack
-    
-    iret
-
 unhandled_interrupts:
 
     push ebp
@@ -85,37 +71,6 @@ unhandled_interrupts:
 
     iret
 
-idt_20_h:
-    cli
-
-    push ebp
-    mov ebp, esp
-    pushad
-
-    call timer_handler
-
-    popad
-    mov esp, ebp
-    pop ebp
-    sti
-    iret
-
-int_21_h:
-
-    cli
-    push ebp
-    mov ebp, esp
-    pushad
-
-    call int_21_handler
-    
-    popad
-    mov esp, ebp
-    pop ebp
-    sti
-
-    iret
-
 no_interrupt_routine:
 
     cli
@@ -133,6 +88,74 @@ no_interrupt_routine:
     sti
     iret
 
+%macro interrupt_no_err 1
+    global int%1
+    int%1:
+        ; IA-32 mode stack after priv. change
+        ; IP             ----------> stack top.
+        ; CS
+        ; FLAGS
+        ; SP
+        ; SS
+        
+        ; Notice we have no error code? So we send a dummy 0x00 to make it generic. Read about this in issues.
+        push dword 0x00
+
+        ; append registers on them 
+        pushad
+
+        ; push interrupt frame.
+        push esp
+        push dword %1
+
+        call interrupt_handler
+        add esp, 8
+
+        popad
+        
+        ; pop the fake err code
+        add esp, 4
+        iret
+%endmacro
+
+%macro interrupt_err 1
+    global int%1
+    int%1:
+        ; IA-32 mode stack after priv. change
+        ; Error Code (pushed onto stack)             ----------> stack top.
+        ; IP
+        ; CS
+        ; FLAGS
+        ; SP
+        ; SS                        
+
+        ; append registers on them 
+        pushad
+
+        ; push interrupt frame.
+        push esp
+        push dword %1
+
+        call interrupt_handler
+        add esp, 8
+
+        popad
+
+        ; pop the err code
+        add esp, 4
+        iret
+%endmacro
+
+%assign i 0
+%rep 256
+    ; Interrupts with error.
+    %if i = 8 || i = 10 || i = 11 || i = 12 || i = 13 || i = 14 || i = 17 || i = 21
+        interrupt_err i
+    %else
+        interrupt_no_err i
+    %endif
+%assign i i+1
+%endrep
 
 isr80h_wrapper:
 
@@ -145,8 +168,12 @@ isr80h_wrapper:
     ; SP
     ; SS
 
+    ; Push fake error code
+    push dword 0x00
+
     ; append registers on them 
     pushad
+
 
     ; push interrupt frame.
     push esp
@@ -159,6 +186,8 @@ isr80h_wrapper:
     
     ; get back the registers of process
     popad
+    ; Remove the fake err_code
+    add esp, 4
 
     mov eax, [tmp_res]
     iretd
@@ -166,3 +195,14 @@ isr80h_wrapper:
 section .data
 ; Temp register to store return value from isr80h_handler
 tmp_res: dd 0
+
+%macro interrupt_array_entry 1
+    dd int%1
+%endmacro
+
+interrupt_pointer_table:
+%assign i 0
+%rep 256
+    interrupt_array_entry i
+%assign i i+1
+%endrep
