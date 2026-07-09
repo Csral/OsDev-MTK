@@ -26,7 +26,9 @@ struct process {
     } keyboard;
 };
 
+int process_switch(struct process* process);
 int process_load_for_slot(const char* filename, struct process** process, int process_slot);
+int process_load_switch(const char* filename, struct process** process);
 int process_load(const char* filename, struct process** process);
 struct process* get_current_process(void);
 struct process* get_process(int pid);
