@@ -54,6 +54,8 @@ void keyboard_push(char c) {
     struct process* process = get_current_process();
     if (!process) return;
 
+    if (c == 0x00) return;
+
     int real_idx = keyboard_get_tail_index(process);
     process->keyboard.buffer[real_idx] = c;
     process->keyboard.tail++;

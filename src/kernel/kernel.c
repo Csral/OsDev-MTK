@@ -173,7 +173,45 @@ void terminal_init(void) {
     terminal_bg_color = TEXT_MODE_COLORS_BLACK;
 }
 
+void terminal_backspace(void) {
+
+    if (terminal_x == 0 && terminal_y == 0) return;
+
+    if (terminal_x == 0) {
+        terminal_y--;
+        terminal_x = TEXT_MODE_CHARACTERS_PER_LINE;
+        terminal_puts_raw(' ', TEXT_MODE_COLORS_BLACK, TEXT_MODE_COLORS_BLACK, VGA_get_offset(terminal_x, terminal_y));
+    }
+
+    terminal_x--;
+    terminal_puts_raw(' ', TEXT_MODE_COLORS_BLACK, TEXT_MODE_COLORS_BLACK, VGA_get_offset(terminal_x, terminal_y));
+    return;
+
+}
+
 void terminal_puts(const char ch) {
+
+    //* Handle special characters
+
+    if (terminal_x >= TEXT_MODE_CHARACTERS_PER_LINE) {
+        terminal_x = 0;
+        terminal_y++;
+    }
+
+    if (ch == '\n') {
+        terminal_x = 0;
+        terminal_y++;
+        return;
+    } else if (ch == '\b') {
+        terminal_backspace();
+        return;
+    } else if (ch == '\r') {
+        terminal_x = 0;
+        return;
+    } else if (ch == '\t') {
+        terminal_x = (terminal_x + 4) & ~3; // align to 4-char space
+        return;
+    }
 
     // Little endian 
     unsigned short tmp_ch = (((terminal_bg_color << 4) | (terminal_fg_color & TEXT_MODE_BIT_MASK_FG_COLOR)) << 8) | ch;
@@ -187,41 +225,8 @@ void terminal_write(const char* str) {
     unsigned long int ctr = 0;
 
     while (str[ctr]) {
-
-        //* Handle special characters
-
-        if (terminal_x >= TEXT_MODE_CHARACTERS_PER_LINE) {
-            terminal_x = 0;
-            terminal_y++;
-        }
-
-        if (str[ctr] == '\n') {
-            terminal_x = 0;
-            terminal_y++;
-            ctr++;
-            continue;
-        } else if (str[ctr] == '\b') {
-            
-            if (terminal_x > 0) {
-                terminal_x--;
-                terminal_puts_raw(' ', TEXT_MODE_COLORS_BLACK, TEXT_MODE_COLORS_BLACK, VGA_get_offset(terminal_x, terminal_y));
-            }
-
-            ctr++;
-            continue;
-        } else if (str[ctr] == '\r') {
-            terminal_x = 0;
-            ctr++;
-            continue;
-        } else if (str[ctr] == '\t') {
-            terminal_x = (terminal_x + 4) & ~3; // align to 4-char space
-            ctr++;
-            continue;
-        }
-
         terminal_puts(str[ctr]);
         ctr++;
-
     }
 
 }
