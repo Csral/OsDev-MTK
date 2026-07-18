@@ -18,10 +18,16 @@ void interrupt_handler(int interrupt, struct interrupt_frame* frame) {
     if (interrupt_callbacks[interrupt] != 0) {
         task_current_save_state(frame);
         interrupt_callbacks[interrupt](frame);
+    } else if (interrupt < 0x20 && interrupt >= 0x30) {
+        // The kernel doesn't have a handler for this interrupt
+        // Panic the system
+        terminal_clear();
+        print("Interrupt number: ");
+        printint(interrupt);
+        kernel_panic("\nUnhandled interrupt triggered!\tHalting CPU.\n");
     }
 
     task_page();
-    // if (interrupt == 13) int_gp_fault(frame);
     
     // Specifically sending ACK if needed to preserve CPU cycles and maintain correctness
     if (interrupt >= 0x20 && interrupt < 0x30) {
@@ -53,25 +59,18 @@ void idt_init(void) {
     idt_load(&idtr_descriptor);
 
     /* Initialize all interrupt handlers as unhandled - THEY HALT THE CPU. */
-
     for (int i = 0; i < IDT_MAX_ENTRIES; i++)
         idt_set(i, interrupt_pointer_table[i], KERNEL_CODE_SELECTOR, INTERRUPT_32_BIT_INTERRUPT_GATE_KERNEL_SPACE);
 
-    // for (int i = 0; i < IDT_CPU_EXCEPTION_ENTRIES; i++)
-    //     idt_set(i, interrupt_pointer_table[i], KERNEL_CODE_SELECTOR, INTERRUPT_32_BIT_INTERRUPT_GATE_KERNEL_SPACE);
-
-    // for (int i = IDT_IRQ_STARTING_INTERRUPT_NUMBER; i < IDT_IRQ_END_INTERRUPT_NUMBER; i++)
-    //     idt_set(i, interrupt_pointer_table[i], KERNEL_CODE_SELECTOR, INTERRUPT_32_BIT_INTERRUPT_GATE_KERNEL_SPACE);
-
-    // for (int i = IDT_FREE_STARTING_INTERRUPT_NUMBER; i < IDT_MAX_ENTRIES; i++)
-    //     idt_set(i, interrupt_pointer_table[i], KERNEL_CODE_SELECTOR, INTERRUPT_32_BIT_INTERRUPT_GATE_KERNEL_SPACE);
-
-    /* Set IDT table with handled interrupts */
-    idt_set(0, &idt_int_zero_handler, KERNEL_CODE_SELECTOR, INTERRUPT_32_BIT_INTERRUPT_GATE_USER_SPACE);
-    // idt_set(13, &general_protection_fault, KERNEL_CODE_SELECTOR, INTERRUPT_32_BIT_INTERRUPT_GATE_KERNEL_SPACE);
-    // idt_set(32, &idt_20_h, KERNEL_CODE_SELECTOR, INTERRUPT_32_BIT_INTERRUPT_GATE_KERNEL_SPACE);
-    // idt_set(33, &int_21_h, KERNEL_CODE_SELECTOR, INTERRUPT_32_BIT_INTERRUPT_GATE_KERNEL_SPACE);
+    // Update specific CPU interrupt wrappers, handlers or configuration if needed.
+    /* Allow the interrupt to be trigger by CPL 3 */
     idt_set(0x80, &isr80h_wrapper, KERNEL_CODE_SELECTOR, INTERRUPT_32_BIT_INTERRUPT_GATE_USER_SPACE);
+
+    /* Register appropriate interrupt handlers. */
+    idt_register_interrupt_callback(0, &int_zero);
+    idt_register_interrupt_callback(6, &invalid_opcode_fault_handler);
+    idt_register_interrupt_callback(13, &int_gp_fault);
+    idt_register_interrupt_callback(14, &page_fault_h);
 
 }
 

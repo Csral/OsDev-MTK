@@ -1,92 +1,15 @@
 section .asm
 
-
 global idt_int_zero_handler
 global invalid_opcode_fault_handler
-
 global unhandled_interrupts
 global no_interrupt_routine
-
 global isr80h_wrapper
-
 global interrupt_pointer_table
 
 ; 32-bit Kernel Handler functions
-extern int_zero
-extern idt_invalid_opcode_fault_handler
-extern unhandled_interrupts_handler_basic
-extern no_interrupt_routine_handler
 extern isr80h_handler
-
 extern interrupt_handler
-
-idt_int_zero_handler:
-
-    push ebp
-    mov ebp, esp
-    pushad
-
-    call int_zero
-
-    popad
-    mov esp, ebp
-    pop ebp
-
-    iret
-
-
-invalid_opcode_fault_handler:
-
-    push ebp
-    mov ebp, esp
-    pushad
-
-    call idt_invalid_opcode_fault_handler
-    ; As of now, we do not return from this fault handler - we panic the kernel.
-
-    popad
-    mov esp, ebp
-    pop ebp
-
-    iret
-
-unhandled_interrupts:
-
-    push ebp
-    mov ebp, esp
-    pushad
-
-    call unhandled_interrupts_handler_basic
-    ; Do not expect to return from this interrupt.
-    cli
-    .stop_trying_to_rtn:
-        hlt
-        jmp .stop_trying_to_rtn
-
-    ; restore proper stack before making this generic
-
-    popad
-    mov esp, ebp
-    pop ebp
-
-    iret
-
-no_interrupt_routine:
-
-    cli
-    push ebp
-    mov ebp, esp
-    pushad
-
-    call no_interrupt_routine_handler
-
-    ; restore proper stack before making this generic
-    popad
-    mov esp, ebp
-    pop ebp
-
-    sti
-    iret
 
 %macro interrupt_no_err 1
     global int%1
@@ -203,6 +126,12 @@ tmp_res: dd 0
 interrupt_pointer_table:
 %assign i 0
 %rep 256
-    interrupt_array_entry i
+
+    %if i = 0x80
+        dd isr80h_handler
+    %else
+        interrupt_array_entry i
+    %endif
+    
 %assign i i+1
 %endrep

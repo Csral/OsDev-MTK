@@ -46,27 +46,15 @@ struct interrupt_frame {
 } __attribute__((__packed__));
 
 typedef void*(*ISR80H_COMMAND)(struct interrupt_frame* frame);
-typedef void(*INTERRUPT_CALLBACK_FUNCTION)();
+typedef void(*INTERRUPT_CALLBACK_FUNCTION)(struct interrupt_frame* frame);
 
-void int_zero(void);
-void idt_invalid_opcode_fault_handler(void);
+void int_zero(struct interrupt_frame* stack_frame);
+void invalid_opcode_fault_handler(struct interrupt_frame* stack_frame);
 void int_gp_fault(struct interrupt_frame* stack_frame);
-void unhandled_interrupts_handler_basic(void);
+void page_fault_h(struct interrupt_frame* stack_frame);
 
-/* Interrupt handlers */
-extern void idt_int_zero_handler(void);
-extern void invalid_opcode_fault_handler(void);
-/* Syscall handler */
+// /* Syscall handler */
 extern void isr80h_wrapper();
-
-/* IRQs */
-void timer_handler(void);
-void int_21_handler(void);
-void no_interrupt_routine_handler(void);
-
-/* Unhandled interrupts */
-extern void unhandled_interrupts(void);
-extern void no_interrupt_routine(void); // IRQs
 
 /* Utils */
 extern unsigned short get_current_cs(void);
