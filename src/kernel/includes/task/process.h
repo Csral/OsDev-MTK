@@ -5,13 +5,27 @@
 #include "config.h"
 #include "task/task.h"
 
-//* Flat Binary
+//* Uncomment this line to panic system
+// #define PANIC_SYSTEM_ON_PROCESS_FORMAT_UNHANDLED
+
+#define PROCESS_FORMAT_ELF 0x0
+#define PROCESS_FORMAT_FBIN 0x1
+
+typedef unsigned char process_format_t;
+
 struct process {
     uint32_t id;
     char filename[_FS_MAX_PATH_LEN];
     struct task* task;
     void* allocations[BasicOS_MAX_ALLOCATIONS_ALLOWED_PER_PROCESS];
-    void* ptr; //* A pointer to the process memory.
+    process_format_t filetype;
+
+    //* A pointer to the process memory.
+    union {
+        void* ptr;
+        struct elf_file* elf_file;
+    };
+    
 
     void* stack; //* PTR to Stack
     uint32_t size; //* size of ptr.

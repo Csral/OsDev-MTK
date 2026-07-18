@@ -32,5 +32,6 @@ int paging_map_to(struct paging_4gb_memory_map* directory, void* v_addr, void* p
 uint32_t paging_get(uint32_t* directory, void* v_addr);
 
 unsigned long paging_align_address(unsigned long addr);
+void* paging_align_to_lower_page_addr(void* addr);
 
 #endif

@@ -7,6 +7,7 @@
 #include "task/process.h"
 #include "string/string.h"
 #include "interrupts.h"
+#include "loader/formats/elf_loader.h"
 
 struct task* current_task = 0;
 
@@ -20,7 +21,13 @@ int task_init(struct task* task, struct process* process) {
     task->page_directory = _gen_paging_4gb(PAGING_MASKS_IS_PRESENT | PAGING_MASKS_ACCESS_ALL);
     if (!task->page_directory) return -EIO;
 
-    task->registers.eip = BKE_TASK_PROGRAM_VIRTUAL_ADDR;
+    
+    if (process->filetype == PROCESS_FORMAT_ELF) {
+        task->registers.eip = elf_header(process->elf_file)->e_entry;
+    } else {
+        task->registers.eip = BKE_TASK_PROGRAM_VIRTUAL_ADDR;
+    }
+
     task->registers.ss = BKE_TASK_USER_DATA_SEGMENT;
     task->registers.cs = BKE_TASK_USER_CODE_SEGMENT;
     task->registers.esp = BKE_TASK_PROGRAM_VIRTUAL_STACK_ADDR_START;

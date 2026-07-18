@@ -7,6 +7,7 @@
 #include "string/string.h"
 #include "kernel.h"
 #include "memory/paging/paging.h"
+#include "loader/formats/elf_loader.h"
 
 struct process* current_process = 0;
 static struct process* processes[BasicOS_MAX_PROCESSES];
@@ -58,6 +59,7 @@ static int process_load_binary(const char* filename, struct process* process) {
         goto out;
     }
 
+    process->filetype = PROCESS_FORMAT_FBIN;
     process->ptr = program_data_ptr;
     process->size = stat.file_size;
 
@@ -67,13 +69,36 @@ static int process_load_binary(const char* filename, struct process* process) {
 
 }
 
-static int process_load_data(const char* filename, struct process* process) {
-    
-    //* Handle different formats differently. For now only supports flat binary, no ELF etc.
+static int process_load_elf(const char* filename, struct process* process) {
     
     int res = 0;
-    res = process_load_binary(filename, process);
+
+    struct elf_file* elf_file = 0;
+    res = elf_load(filename, &elf_file);
+    if (res < 0) goto out;
+
+    process->filetype = PROCESS_FORMAT_ELF;
+    process->elf_file = elf_file;
+
+    out:
     return res;
+
+}
+
+static int process_load_data(const char* filename, struct process* process) {
+    
+    //* Handle different formats differently. For now only supports flat binary, and ELF.
+    
+    int res = 0;
+    res = process_load_elf(filename, process);
+
+    if (res == -EINVFORMAT) {
+        // assume flat-binary
+        res = process_load_binary(filename, process);
+    }
+
+    return res;
+
 }
 
 int process_map_binary(struct process* process) {
@@ -90,17 +115,68 @@ int process_map_binary(struct process* process) {
 
 }
 
+static int process_map_elf(struct process* process) {
+
+    int res = 0;
+
+    struct elf_file* elf_file = process->elf_file;
+    struct elf_header* header = elf_header(elf_file);
+    struct elf32_phdr* phdrs = elf_pheader(header);
+
+    for (int i = 0; i < header->e_phnum; i++) {
+
+        struct elf32_phdr* phdr = &phdrs[i];
+        void* phdr_physical_addr = elf_phdr_compute_physical_address(elf_file, phdr);
+
+        int flags = PAGING_MASKS_IS_PRESENT | PAGING_MASKS_ACCESS_ALL;
+        if (phdr->p_flags & PF_W) {
+            flags |= PAGING_MASKS_IS_WRITABLE;
+        }
+
+        res = paging_map_to(process->task->page_directory,
+            paging_align_to_lower_page_addr((void*) phdr->p_vaddr),
+            paging_align_to_lower_page_addr(phdr_physical_addr),
+            (void*) paging_align_address( (unsigned long) phdr_physical_addr + phdr->p_filesz),
+            flags
+        );
+
+        if (res < 0) break;
+
+    }
+
+    out:
+    return res;
+
+}
+
 int process_map_memory(struct process* process) {
     
     //* Handle different format differently. Well, like process_load_data.
 
     int res = 0;
-    res = process_map_binary(process);
+
+    switch (process->filetype) {
+        case PROCESS_FORMAT_ELF:
+            res = process_map_elf(process);
+            break;
+        case PROCESS_FORMAT_FBIN:
+            res = process_map_binary(process);
+            break;
+        default:
+            // Kernel did something wrong to reach this branch.
+            // To ensure the kernel doesn't unexpectedly crash, we return error.
+            #ifdef PANIC_SYSTEM_ON_PROCESS_FORMAT_UNHANDLED
+            kernel_panic("process_map_memory: Process format is not supported by the kernel.");
+            #else
+            res = -EINVFORMAT;
+            #endif
+    }
 
     if (res < 0) {
         goto out;
     }
 
+    // map the stack
     paging_map_to(process->task->page_directory,
         (void*) BKE_TASK_PROGRAM_VIRTUAL_STACK_ADDR_END,
         process->stack,

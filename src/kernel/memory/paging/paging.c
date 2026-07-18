@@ -58,6 +58,10 @@ inline unsigned long paging_align_address(unsigned long addr) {
     return (addr % PAGING_PAGE_SIZE) ? ( addr + ( PAGING_PAGE_SIZE - (addr % PAGING_PAGE_SIZE)) ) : addr;
 }
 
+inline void* paging_align_to_lower_page_addr(void* addr) {
+    return (void*) ((unsigned long) addr - ((unsigned long) addr) % PAGING_PAGE_SIZE);
+}
+
 int paging_get_indexes(void* virtual_address, uint32_t* directory_index_out, uint32_t* table_index_out) {
 
     //* Returns the directory and table entry in which this virtual address resides. 
@@ -152,6 +156,10 @@ uint32_t paging_get(uint32_t* directory, void* v_addr) {
     uint32_t table_index = 0;
     paging_get_indexes(v_addr, &directory_index, &table_index);
     uint32_t entry = directory[directory_index];
+
+    // directory is not present
+    if (!(entry & 0x1)) return 0;
+
     uint32_t* table = (uint32_t*) (entry & 0xFFFFF000);
 
     return table[table_index];

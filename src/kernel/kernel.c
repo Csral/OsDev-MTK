@@ -79,9 +79,9 @@ void kernel_main(void) {
     terminal_clear();
 
     struct process* process = 0;
-    int res = process_load_switch("0:/blank.bin", &process);
+    int res = process_load_switch("0:/blank.elf", &process);
     if (res != NE) {
-        kernel_panic("Failed to load blank.bin");
+        kernel_panic("Failed to load blank.elf");
     }
 
     task_run_first_task();
