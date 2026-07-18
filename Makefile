@@ -1,4 +1,4 @@
-FILES = ./build/kernel.asm.o ./build/kernel.o ./build/gdt/gdt.asm.o ./build/gdt/gdt.o ./build/idt/idt.asm.o ./build/idt/idt.o ./build/idt/interrupts.asm.o ./build/idt/interrupts_ext.asm.o ./build/idt/interrupts.o ./build/isr80h/isr80h.o ./build/isr80h/misc.o ./build/isr80h/io.o ./build/memory/memory.o ./build/task/task.o ./build/task/task.asm.o ./build/task/tss.asm.o ./build/task/process.o ./build/io/io.asm.o ./build/memory/heap/heap.o ./build/memory/heap/kheap.o ./build/memory/paging/paging.asm.o ./build/memory/paging/paging.o ./build/disk/disk.o ./build/string/string.o ./build/fs/pparser.o ./build/disk/streamer.o ./build/fs/file.o ./build/fs/fat/fat16.o ./build/keyboard/keyboard.o ./build/keyboard/classic.o
+FILES = ./build/kernel.asm.o ./build/kernel.o ./build/loader/formats/elf.o ./build/loader/formats/elf_loader.o ./build/gdt/gdt.asm.o ./build/gdt/gdt.o ./build/idt/idt.asm.o ./build/idt/idt.o ./build/idt/interrupts.asm.o ./build/idt/interrupts_ext.asm.o ./build/idt/interrupts.o ./build/isr80h/isr80h.o ./build/isr80h/misc.o ./build/isr80h/io.o ./build/memory/memory.o ./build/task/task.o ./build/task/task.asm.o ./build/task/tss.asm.o ./build/task/process.o ./build/io/io.asm.o ./build/memory/heap/heap.o ./build/memory/heap/kheap.o ./build/memory/paging/paging.asm.o ./build/memory/paging/paging.o ./build/disk/disk.o ./build/string/string.o ./build/fs/pparser.o ./build/disk/streamer.o ./build/fs/file.o ./build/fs/fat/fat16.o ./build/keyboard/keyboard.o ./build/keyboard/classic.o
 INCLUDES = -I ./src/kernel/includes
 FLAGS = -g -ffreestanding -nostdlib -falign-jumps -falign-functions -falign-labels -falign-loops -fstrength-reduce -fomit-frame-pointer -finline-functions -Wno-unused-function -fno-builtin -Werror -Wno-unused-label -Wno-cpp -Wno-unused-parameter -nostartfiles -nodefaultlibs -Wall -O0 -Iinc
 
@@ -15,7 +15,7 @@ all: ./bin/boot.bin ./bin/extended.bin ./bin/kernel.bin user_programs
 	# copy a file over to the bin
 	sudo cp ./message.txt /mnt/OsDevMnt
 	# Load user program
-	sudo cp ./programs/blank/blank.bin /mnt/OsDevMnt
+	sudo cp ./programs/blank/blank.elf /mnt/OsDevMnt
 
 	sudo umount /mnt/OsDevMnt
 
@@ -118,6 +118,12 @@ all: ./bin/boot.bin ./bin/extended.bin ./bin/kernel.bin user_programs
 
 ./build/keyboard/classic.o: ./src/kernel/keyboard/classic.c
 	i686-elf-gcc $(INCLUDES) $(FLAGS) -std=gnu99 -c ./src/kernel/keyboard/classic.c -o ./build/keyboard/classic.o
+
+./build/loader/formats/elf.o: ./src/kernel/loader/formats/elf.c
+	i686-elf-gcc $(INCLUDES) $(FLAGS) -std=gnu99 -c ./src/kernel/loader/formats/elf.c -o ./build/loader/formats/elf.o
+
+./build/loader/formats/elf_loader.o: ./src/kernel/loader/formats/elf_loader.c
+	i686-elf-gcc $(INCLUDES) $(FLAGS) -std=gnu99 -c ./src/kernel/loader/formats/elf_loader.c -o ./build/loader/formats/elf_loader.o
 
 user_programs:
 	cd ./programs/blank && $(MAKE) all
