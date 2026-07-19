@@ -1,0 +1,7 @@
+#ifndef BASIC_OS_STDLIB_STATUS_H
+#define BASIC_OS_STDLIB_STATUS_H
+
+#define EINVARG 1
+#define ENOMEM 2
+
+#endif
