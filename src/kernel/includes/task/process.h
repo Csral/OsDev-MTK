@@ -2,6 +2,7 @@
 #define _PROCESS_H_
 
 #include <stdint.h>
+#include <stddef.h>
 #include "config.h"
 #include "task/task.h"
 
@@ -13,11 +14,16 @@
 
 typedef unsigned char process_format_t;
 
+struct process_allocation {
+    void* ptr;
+    size_t size;
+};
+
 struct process {
     uint32_t id;
     char filename[_FS_MAX_PATH_LEN];
     struct task* task;
-    void* allocations[BasicOS_MAX_ALLOCATIONS_ALLOWED_PER_PROCESS];
+    struct process_allocation allocations[BasicOS_MAX_ALLOCATIONS_ALLOWED_PER_PROCESS];
     process_format_t filetype;
 
     //* A pointer to the process memory.

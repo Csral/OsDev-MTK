@@ -297,7 +297,7 @@ static int process_find_free_allocation_slot(struct process* process) {
 
     for (int i = 0; i < BasicOS_MAX_ALLOCATIONS_ALLOWED_PER_PROCESS; i++) {
         
-        if (process->allocations[i] == 0x00) {
+        if (process->allocations[i].ptr == 0x00) {
             res = i;
             break;
         }
@@ -319,8 +319,24 @@ void* process_malloc(struct process* process, size_t size) {
     void* ptr = kzalloc(size);
     if (!ptr) return 0;
 
-    process->allocations[idx] = ptr;
+    int res = paging_map_to(process->task->page_directory,
+        ptr,
+        ptr,
+        (void*) paging_align_address(((size_t) ptr + size)),
+        PAGING_MASKS_IS_WRITABLE | PAGING_MASKS_IS_PRESENT | PAGING_MASKS_ACCESS_ALL
+    );
+
+    if (res < 0)
+        goto out_failure;
+
+    process->allocations[idx].ptr = ptr;
+    process->allocations[idx].size = size;
     return ptr;
+
+    out_failure:
+    if (ptr)
+        kfree(ptr);
+    return 0;
 
 }
 
@@ -329,8 +345,24 @@ void process_free(struct process* process, void* ptr) {
     for (int i = 0; i < BasicOS_MAX_ALLOCATIONS_ALLOWED_PER_PROCESS; i++) {
         
         // Allocation belongs to this process. So we free it.
-        if (process->allocations[i] == ptr) {
-            process->allocations[i] = 0x00;
+        if (process->allocations[i].ptr == ptr) {
+
+            struct process_allocation* pa = &process->allocations[i];
+            if (!pa)
+                return;
+
+            int res = paging_map_to(process->task->page_directory,
+                pa->ptr,
+                pa->ptr,
+                (void*) paging_align_address((size_t) pa->ptr + pa->size),
+                0x00
+            );
+
+            if (res < 0)
+                return;
+
+            process->allocations[i].ptr = 0x00;
+            process->allocations[i].size = 0x00;
             kfree(ptr);
             break;
         }
