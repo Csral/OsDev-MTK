@@ -9,6 +9,7 @@ enum SYSCALL_IDS {
     SYS_PUT_CHAR,
     SYS_MALLOC,
     SYS_FREE,
+    SYS_PROCESS_LOAD_START,
 };
 
 void isr80h_register_commands(void);
