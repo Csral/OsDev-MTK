@@ -5,7 +5,7 @@
 int main(int argc, char** argv) {
  
     print("Hello from cblank. \n");
-    char x;
+    // char x;
 
     void* ptr = malloc(100);
     if (ptr) {
@@ -16,13 +16,12 @@ int main(int argc, char** argv) {
     print("Ptr fred\n");
     printf("Testing a numerical %i %s\n", 192, "input");
 
-    print("You may type:\n");
+    char buf[1024];
+    int r_ctr = terminal_readline(buf, 1024, true);
+    
+    printf("\nRead %i bytes from terminal.\nOutput: %s\n", r_ctr, buf);
 
     while(1) {
-        x = getkey();
-        if (x != 0x00U) {
-            putchar((int) x);
-        }
     };
 
     return 0;
