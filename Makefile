@@ -1,4 +1,4 @@
-FILES = ./build/kernel.asm.o ./build/kernel.o ./build/loader/formats/elf.o ./build/loader/formats/elf_loader.o ./build/gdt/gdt.asm.o ./build/gdt/gdt.o ./build/idt/idt.asm.o ./build/idt/idt.o ./build/idt/interrupts.asm.o ./build/idt/interrupts_ext.asm.o ./build/idt/interrupts.o ./build/isr80h/isr80h.o ./build/isr80h/misc.o ./build/isr80h/io.o ./build/isr80h/memory.o ./build/memory/memory.o ./build/task/task.o ./build/task/task.asm.o ./build/task/tss.asm.o ./build/task/process.o ./build/io/io.asm.o ./build/memory/heap/heap.o ./build/memory/heap/kheap.o ./build/memory/paging/paging.asm.o ./build/memory/paging/paging.o ./build/disk/disk.o ./build/string/string.o ./build/fs/pparser.o ./build/disk/streamer.o ./build/fs/file.o ./build/fs/fat/fat16.o ./build/keyboard/keyboard.o ./build/keyboard/classic.o
+FILES = ./build/kernel.asm.o ./build/kernel.o ./build/loader/formats/elf.o ./build/loader/formats/elf_loader.o ./build/gdt/gdt.asm.o ./build/gdt/gdt.o ./build/idt/idt.asm.o ./build/idt/idt.o ./build/idt/interrupts.asm.o ./build/idt/interrupts_ext.asm.o ./build/idt/interrupts.o ./build/isr80h/isr80h.o ./build/isr80h/misc.o ./build/isr80h/io.o ./build/isr80h/memory.o ./build/isr80h/process.o ./build/memory/memory.o ./build/task/task.o ./build/task/task.asm.o ./build/task/tss.asm.o ./build/task/process.o ./build/io/io.asm.o ./build/memory/heap/heap.o ./build/memory/heap/kheap.o ./build/memory/paging/paging.asm.o ./build/memory/paging/paging.o ./build/disk/disk.o ./build/string/string.o ./build/fs/pparser.o ./build/disk/streamer.o ./build/fs/file.o ./build/fs/fat/fat16.o ./build/keyboard/keyboard.o ./build/keyboard/classic.o
 INCLUDES = -I ./src/kernel/includes
 FLAGS = -g -ffreestanding -nostdlib -falign-jumps -falign-functions -falign-labels -falign-loops -fstrength-reduce -fomit-frame-pointer -finline-functions -Wno-unused-function -fno-builtin -Werror -Wno-unused-label -Wno-cpp -Wno-unused-parameter -nostartfiles -nodefaultlibs -Wall -O0 -Iinc
 
@@ -68,6 +68,9 @@ all: ./bin/boot.bin ./bin/extended.bin ./bin/kernel.bin
 ./build/isr80h/memory.o: ./src/kernel/isr80h/memory.c
 	i686-elf-gcc $(INCLUDES) $(FLAGS) -std=gnu99 -c ./src/kernel/isr80h/memory.c -o ./build/isr80h/memory.o
 
+./build/isr80h/process.o: ./src/kernel/isr80h/process.c
+	i686-elf-gcc $(INCLUDES) $(FLAGS) -std=gnu99 -c ./src/kernel/isr80h/process.c -o ./build/isr80h/process.o
+
 ./build/memory/memory.o: ./src/kernel/memory/memory.c
 	i686-elf-gcc $(INCLUDES) $(FLAGS) -std=gnu99 -c ./src/kernel/memory/memory.c -o ./build/memory/memory.o
 
@@ -132,15 +135,18 @@ user_programs:
 	cd ./programs/stdlib && $(MAKE) all
 	cd ./programs/blank && $(MAKE) all
 	cd ./programs/cblank && $(MAKE) all
+	cd ./programs/shell && $(MAKE) all
 
 user_programs_clean:
 	cd ./programs/stdlib && $(MAKE) clean
 	cd ./programs/blank && $(MAKE) clean
 	cd ./programs/cblank && $(MAKE) clean
+	cd ./programs/shell && $(MAKE) clean
 
 copy_user_programs: user_programs
 	sudo cp ./programs/blank/blank.elf /mnt/OsDevMnt
 	sudo cp ./programs/cblank/cblank.elf /mnt/OsDevMnt
+	sudo cp ./programs/shell/shell.elf /mnt/OsDevMnt
 
 clean: user_programs_clean
 	rm -rf ./bin/*.bin
