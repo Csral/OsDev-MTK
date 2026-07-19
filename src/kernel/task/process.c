@@ -136,7 +136,7 @@ static int process_map_elf(struct process* process) {
         res = paging_map_to(process->task->page_directory,
             paging_align_to_lower_page_addr((void*) phdr->p_vaddr),
             paging_align_to_lower_page_addr(phdr_physical_addr),
-            (void*) paging_align_address( (unsigned long) phdr_physical_addr + phdr->p_filesz),
+            (void*) paging_align_address( (unsigned long) phdr_physical_addr + phdr->p_memsz),
             flags
         );
 
@@ -288,5 +288,55 @@ int process_load_for_slot(const char* filename, struct process** process, int pr
     }
 
     return res;
+
+}
+
+static int process_find_free_allocation_slot(struct process* process) {
+
+    int res = -ENOMEM;
+
+    for (int i = 0; i < BasicOS_MAX_ALLOCATIONS_ALLOWED_PER_PROCESS; i++) {
+        
+        if (process->allocations[i] == 0x00) {
+            res = i;
+            break;
+        }
+
+    }
+
+    return res;
+
+}
+
+void* process_malloc(struct process* process, size_t size) {
+
+    int idx = process_find_free_allocation_slot(process);
+    if (idx < 0) {
+        // cannot allocate
+        return 0;
+    }
+
+    void* ptr = kzalloc(size);
+    if (!ptr) return 0;
+
+    process->allocations[idx] = ptr;
+    return ptr;
+
+}
+
+void process_free(struct process* process, void* ptr) {
+
+    for (int i = 0; i < BasicOS_MAX_ALLOCATIONS_ALLOWED_PER_PROCESS; i++) {
+        
+        // Allocation belongs to this process. So we free it.
+        if (process->allocations[i] == ptr) {
+            process->allocations[i] = 0x00;
+            kfree(ptr);
+            break;
+        }
+
+    }
+
+    return;
 
 }

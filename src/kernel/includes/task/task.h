@@ -52,6 +52,7 @@ void task_current_save_state(struct interrupt_frame* frame);
 int copy_string_from_task(struct task* task, void* virtual, void* physical, int max);
 void* task_get_stack_item(struct task* task, int idx);
 void task_page_task(struct task* task);
+void* process_malloc(struct process* process, size_t size);
 
 extern void task_return(struct registers* regs);
 extern void restore_general_purpose_registers(struct registers* regs);
