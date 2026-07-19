@@ -10,6 +10,8 @@ enum SYSCALL_IDS {
     SYS_MALLOC,
     SYS_FREE,
     SYS_PROCESS_LOAD_START,
+    SYS_INVOKE_SYS_COMMAND,
+    SYS_GET_PROCESS_ARGUMENTS,
 };
 
 void isr80h_register_commands(void);

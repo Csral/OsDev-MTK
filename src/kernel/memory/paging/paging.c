@@ -165,3 +165,9 @@ uint32_t paging_get(uint32_t* directory, void* v_addr) {
     return table[table_index];
 
 }
+
+void* paging_get_physical_address(uint32_t* directory, void* v_addr) {
+    void* v_addr_aligned = (void*) paging_align_to_lower_page_addr(v_addr);
+    void* difference = (void*) ((unsigned long) v_addr - (unsigned long) v_addr_aligned);
+    return (void*)((unsigned long) (paging_get(directory,v_addr_aligned) & 0xFFFFF000) + (unsigned long) difference);
+}

@@ -15,5 +15,7 @@ void isr80h_register_commands(void) {
     isr80h_register_command(SYS_MALLOC, sys_malloc);
     isr80h_register_command(SYS_FREE, isr_sys_free);
     isr80h_register_command(SYS_PROCESS_LOAD_START, sys_process_load_start);
+    isr80h_register_command(SYS_INVOKE_SYS_COMMAND, sys_invoke_sys_command);
+    isr80h_register_command(SYS_GET_PROCESS_ARGUMENTS, sys_get_process_arguments);
 
 }
