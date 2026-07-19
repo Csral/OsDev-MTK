@@ -1,0 +1,169 @@
+#include "string.h"
+
+unsigned long strlen(const char* str) {
+    unsigned long ctr = 0;
+
+    while (*str != '\0') {
+        ctr++;
+        str++;
+    }
+
+    return ctr;
+}
+
+unsigned long strnlen(const char* str, unsigned long max_len) {
+    unsigned long ctr = 0;
+
+    for (; ctr < max_len; ctr++)
+        if (str[ctr] == '\0')
+            break;
+
+    return ctr;
+}
+
+int strncmp(const char* str1, const char* str2, unsigned long size) {
+    unsigned char t1, t2;
+
+    while (size-- > 0) {
+        t1 = (unsigned char) *str1++;
+        t2 = (unsigned char) *str2++;
+
+        if (t1 != t2) return (t1 - t2);
+        if (t1 == '\0') return 0;
+
+    }
+
+    return 0;
+
+}
+
+unsigned char tolower(unsigned char ch) {
+    
+    if (ch < 65 || ch > 90) return ch;
+    else return (ch + 32);
+}
+
+int istrncmp(const char* str1, const char* str2, unsigned long max) {
+    unsigned char u1, u2;
+
+    while (max-->0) {
+
+        u1 = (unsigned char) *str1++;
+        u2 = (unsigned char) *str2++;
+
+        if (u1 != u2 && tolower(u1) != tolower(u2)) return u1 - u2;
+        if (u1 == '\0') return 0;
+
+    }
+
+    return 0;
+}
+
+unsigned long strnlen_terminator(const char* str, unsigned long max, const char terminator) {
+    
+    unsigned long i = 0;
+    for (i = 0; i < max; i++)
+        if (str[i] == '\0' || str[i] == terminator) break;
+
+    return i;
+
+}
+
+char* strcpy(char* dst, const char* src) {
+    char* res = dst;
+    while (*src != 0)
+        *dst++ = *src++;
+    *dst = 0x00; // append the null terminator.
+    return res;
+}
+
+char* strncpy(char* dst, const char* src, unsigned long size) {
+    char* res = dst;
+    
+    if (size == 0) return res;
+    
+    while (--size > 0 && *src)
+        *dst++ = *src++;
+    *dst = 0x00; // append the null terminator.
+    return res;
+}
+
+unsigned char isdigit(const char c) {
+    return (c > 47) && (c < 58);
+};
+
+int atoi(const char* str) {
+
+    unsigned char is_neg = (str[0] == '-');
+    int result = 0;
+
+    if (is_neg) str++;
+
+    //* Must expect string to be null terminated.
+    //* However, any character not in range of '0' to '9' will
+    //* terminate this loop.
+    while ((*str != '\0') || ((unsigned char) *str) < 48 || ((unsigned char) *str) > 57 ) {
+        result += (result * 10) + (( (unsigned char) *str) - 48);
+        str++;
+    }
+
+    if (is_neg) result *= -1;
+    return result;
+
+}
+
+inline __attribute__((__always_inline__)) int atoic(const char ch) {
+    // A single digit cannot be negative!
+    return (ch - 48);
+}
+
+char* sp = 0x00;
+
+char* strtok(char* str, const char* delimiters) {
+
+    int i = 0;
+    int len = strlen(delimiters);
+    
+    if (!str && !sp) return 0;
+    if (str) sp = str;
+
+    char* p_start = sp;
+
+    while (1) {
+        for (i = 0; i < len; i++) {
+            
+            if (*p_start == delimiters[i]) {
+                p_start++;
+                break;
+            }
+        
+        }
+
+        if (i == len) {
+            sp = p_start;
+            break;
+        }
+    }
+
+    if (*sp == 0x00) {
+        sp = 0;
+        return sp;
+    }
+
+    while (*sp != 0x00) {
+
+        for (i = 0; i < len; i++) {
+            if (*sp == delimiters[i]) {
+                *sp = 0x00;
+                break;
+            }
+        }
+
+        sp++;
+        if (i < len)
+            break;
+    }
+
+    return p_start;
+
+}
