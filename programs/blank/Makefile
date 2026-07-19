@@ -5,3 +5,4 @@ all:
 clean:
 	rm -rf ./build/blank.o
 	rm -rf ./blank.bin
+	rm -rf ./blank.elf
