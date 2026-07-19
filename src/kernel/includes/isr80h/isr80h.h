@@ -7,6 +7,8 @@ enum SYSCALL_IDS {
     SYS_PRINT_EXT,
     SYS_GET_KET,
     SYS_PUT_CHAR,
+    SYS_MALLOC,
+    SYS_FREE,
 };
 
 void isr80h_register_commands(void);
