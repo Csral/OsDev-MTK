@@ -9,6 +9,8 @@ global basic_os_kernel_putchar:function
 global basic_os_kernel_malloc:function
 global basic_os_kernel_free:function
 global basic_os_kernel_start_new_process:function
+global basic_os_kernel_system:function
+global basic_os_kernel_get_process_arguments:function
 
 ; void print(const char* msg)
 print:
@@ -82,6 +84,34 @@ basic_os_kernel_start_new_process:
 
     mov eax, 7              ; sys_process_load_start
     push dword [ebp+8]      ; filename
+    int 0x80
+    add esp, 4
+
+    pop ebp
+    ret
+
+; void basic_os_kernel_system(struct command_argument* arguments);
+basic_os_kernel_system:
+
+    push ebp
+    mov ebp, esp
+
+    mov eax, 8                  ; sys_invoke_sys_command
+    push dword [ebp+8]          ; arguments
+    int 0x80
+    add esp, 4
+
+    pop ebp
+    ret
+
+; void basic_os_kernel_get_process_arguments(struct process_arguments* arguments)
+basic_os_kernel_get_process_arguments:
+
+    push ebp
+    mov ebp, esp
+
+    mov eax, 9              ; sys_get_process_arguments
+    push dword [ebp+8]      ; arguments
     int 0x80
     add esp, 4
 

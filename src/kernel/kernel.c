@@ -81,7 +81,7 @@ void kernel_main(void) {
     struct process* process = 0;
     int res = process_load_switch("0:/shell.elf", &process);
     if (res != NE) {
-        kernel_panic("Failed to load blank.elf");
+        kernel_panic("Failed to load shell.elf");
     }
 
     task_run_first_task();

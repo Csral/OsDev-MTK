@@ -1,10 +1,10 @@
 [bits 32]
 
 global _start
-extern main
+extern _cstart
 
 section .asm
 
 _start:
-    call main
+    call _cstart
     ret

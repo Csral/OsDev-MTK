@@ -6,12 +6,11 @@
 int main(int argc, char** argv) {
  
     print("\nHello from cblank. \n");
-    
-    char* ptr = malloc(20);
-    strcpy(ptr, "Hello World!\n");
-    print(ptr);
-    free(ptr);
-    print("Finale.");
+    print("Printing arguments:\n");
+
+    for (int i = 0; i < argc; i++) {
+        printf("%i: %s\n", i, argv[i]);
+    }
 
     while(1) {
     };

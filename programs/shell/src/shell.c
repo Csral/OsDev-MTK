@@ -11,9 +11,8 @@ int main(int argc, char** argv) {
 
         print("$ ");
         terminal_readline(buf, sizeof(buf), true);
-        basic_os_kernel_start_new_process(buf);
-
         print("\n");
+        basic_os_system_run(buf);
 
     };
 
