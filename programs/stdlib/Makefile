@@ -1,4 +1,4 @@
-FILES = ./build/start.o ./build/kernel.o ./build/stdlib.o ./build/stdio.o
+FILES = ./build/start.o ./build/kernel.o ./build/BasicOS.o ./build/stdlib.o ./build/stdio.o
 INCLUDES = -I ./includes
 FLAGS = -g -nostdlib -falign-jumps -falign-functions -falign-labels -falign-loops -fstrength-reduce -fomit-frame-pointer -finline-functions -Wno-unused-function -fno-builtin -Werror -Wno-unused-label -Wno-cpp -Wno-unused-parameter -nostartfiles -nodefaultlibs -Wall -O0 -Iinc
 
@@ -10,6 +10,9 @@ all: $(FILES)
 
 ./build/kernel.o: ./src/kernel.asm
 	nasm -f elf ./src/kernel.asm -o ./build/kernel.o
+
+./build/BasicOS.o: ./src/BasicOS.c
+	i686-elf-gcc $(INCLUDES) $(FLAGS) -std=gnu99 -c ./src/BasicOS.c -o ./build/BasicOS.o
 
 ./build/stdlib.o: ./src/stdlib.c
 	i686-elf-gcc $(INCLUDES) $(FLAGS) -std=gnu99 -c ./src/stdlib.c -o ./build/stdlib.o

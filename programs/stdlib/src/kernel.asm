@@ -4,7 +4,7 @@
 section .asm
 
 global print:function
-global getkey:function
+global basic_os_kernel_getkey:function
 global basic_os_kernel_putchar:function
 global basic_os_kernel_malloc:function
 global basic_os_kernel_free:function
@@ -22,8 +22,8 @@ print:
     pop ebp
     ret
 
-; char getkey(void);
-getkey:
+; char basic_os_kernel_getkey(void);
+basic_os_kernel_getkey:
     
     push ebp
     mov ebp, esp
