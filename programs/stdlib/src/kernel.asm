@@ -8,6 +8,7 @@ global basic_os_kernel_getkey:function
 global basic_os_kernel_putchar:function
 global basic_os_kernel_malloc:function
 global basic_os_kernel_free:function
+global basic_os_kernel_start_new_process:function
 
 ; void print(const char* msg)
 print:
@@ -67,6 +68,20 @@ basic_os_kernel_free:
 
     mov eax, 6
     push dword [ebp+8]
+    int 0x80
+    add esp, 4
+
+    pop ebp
+    ret
+
+; int basic_os_kernel_start_new_process(const char* filename);
+basic_os_kernel_start_new_process:
+
+    push ebp
+    mov ebp, esp
+
+    mov eax, 7              ; sys_process_load_start
+    push dword [ebp+8]      ; filename
     int 0x80
     add esp, 4
 
