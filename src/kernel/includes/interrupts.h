@@ -56,6 +56,9 @@ void page_fault_h(struct interrupt_frame* stack_frame);
 // /* Syscall handler */
 extern void isr80h_wrapper();
 
+/* IRQs*/
+void timer_interrupt(struct interrupt_frame* frame);
+
 /* Utils */
 extern unsigned short get_current_cs(void);
 void isr80h_register_command(int command_id, ISR80H_COMMAND handler);

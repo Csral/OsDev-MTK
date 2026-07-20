@@ -4,7 +4,7 @@
 #include "string.h"
 
 int main(int argc, char** argv) {
- 
+
     print("\nHello from cblank. \n");
     print("Printing arguments:\n");
 
@@ -12,8 +12,9 @@ int main(int argc, char** argv) {
         printf("%i: %s\n", i, argv[i]);
     }
 
-    while(1) {
-    };
+    // char* ptr = (char*) 0x00;
+    // *ptr = 'A';
+    // print("Written to random address!");
 
     return 0;
 }

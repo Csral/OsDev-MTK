@@ -72,6 +72,9 @@ void idt_init(void) {
     idt_register_interrupt_callback(13, &int_gp_fault);
     idt_register_interrupt_callback(14, &page_fault_h);
 
+    /* IRQs */
+    idt_register_interrupt_callback(0x20, &timer_interrupt);
+
 }
 
 void idt_set(int interrupt_number, void* addr, uint16_t selector, uint8_t type_attr) {
