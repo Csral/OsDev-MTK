@@ -14,4 +14,6 @@ struct keyboard* classic_init(void);
 #define ISR_KEYBOARD_INTERRUPT 0x21
 #define KEYBOARD_INPUT_PORT 0x60
 
+#define CLASSIC_KEYBOARD_CAPS_LOCK_SCAN_CODE 0x3A
+
 #endif

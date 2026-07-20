@@ -77,3 +77,11 @@ char keyboard_pop() {
     return c;
 
 }
+
+__attribute__((__always_inline__)) inline void keyboard_set_caps_lock(struct keyboard* keyboard, int state) {
+    keyboard->caps_lock_state = state;
+}
+
+__attribute__((__always_inline__)) inline int keyboard_get_caps_lock(struct keyboard* keyboard) {
+    return keyboard->caps_lock_state;
+}
