@@ -1,18 +1,27 @@
-#include "../includes/interrupts.h"
-#include "../includes/task/task.h"
+#include "interrupts.h"
+#include "task/task.h"
+#include "task/process.h"
 #include "config.h"
 
 static ISR80H_COMMAND isr80h_commands[BasicOS_MAX_SYSCALL_HANDLE_COMMANDS];
+
+static void interrupt_handlers_terminate_current_process(void) {
+    /* Terminate this process */
+    process_terminate(task_current()->process);
+    task_next();
+}
 
 void int_zero(struct interrupt_frame* stack_frame) {
     print("Divide by zero error!\n\0");
 }
 
 void invalid_opcode_fault_handler(struct interrupt_frame* stack_frame) {
-    kernel_panic("\nUndefined instruction (or reserved op-code) executed.\n");
+    print("\nUndefined instruction (or reserved op-code) executed.\n");
+    interrupt_handlers_terminate_current_process();
 }
 
 void int_gp_fault(struct interrupt_frame* stack_frame) {
+
     terminal_clear();
     print("General Protection Fault (#GP).");
     print("\nRaised at address: ");
@@ -36,12 +45,15 @@ void int_gp_fault(struct interrupt_frame* stack_frame) {
 
     print("\nProcessor eflags: ");
     printint(stack_frame->eflags);
+    print("\n");
 
-    kernel_panic("CPU Halted.");
+    interrupt_handlers_terminate_current_process();
 
 }
 
 void page_fault_h(struct interrupt_frame* stack_frame) {
+
+    /* We are NOT swapping pages yet. So we just crash the program. */
 
     terminal_clear();
     print("Page Fault (#PF).");
@@ -82,8 +94,11 @@ void page_fault_h(struct interrupt_frame* stack_frame) {
 
     print("\nProcessor eflags: ");
     printint(stack_frame->eflags);
+    print("\nSegmentation fault [PID: ");
+    printint(task_current()->process->id);
+    print("]\n");
 
-    kernel_panic("CPU Halted.");
+    interrupt_handlers_terminate_current_process();
 
 }
 
