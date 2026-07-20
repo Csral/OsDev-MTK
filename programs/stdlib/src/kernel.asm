@@ -3,6 +3,7 @@
 
 section .asm
 
+global exit:function
 global print:function
 global basic_os_kernel_getkey:function
 global basic_os_kernel_putchar:function
@@ -11,6 +12,17 @@ global basic_os_kernel_free:function
 global basic_os_kernel_start_new_process:function
 global basic_os_kernel_system:function
 global basic_os_kernel_get_process_arguments:function
+
+; void exit(void)
+exit:
+    push ebp
+    mov ebp, esp
+
+    xor eax, eax
+    int 0x80
+
+    pop ebp
+    ret
 
 ; void print(const char* msg)
 print:
@@ -90,7 +102,7 @@ basic_os_kernel_start_new_process:
     pop ebp
     ret
 
-; void basic_os_kernel_system(struct command_argument* arguments);
+; int basic_os_kernel_system(struct command_argument* arguments);
 basic_os_kernel_system:
 
     push ebp

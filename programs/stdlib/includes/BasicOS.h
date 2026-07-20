@@ -13,6 +13,7 @@ struct process_arguments {
     char** argv;
 };
 
+extern void exit(void);
 extern void print(const char* msg);
 char getkey(void);
 
