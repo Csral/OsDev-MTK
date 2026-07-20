@@ -46,6 +46,7 @@ int task_free(struct task* task);
 int task_switch(struct task* task);
 int task_page();
 struct task* task_get_next();
+void task_next(void);
 
 void task_run_first_task(void);
 void task_current_save_state(struct interrupt_frame* frame);

@@ -80,6 +80,18 @@ struct task* task_get_next() {
     return (current_task->next) ? current_task->next : task_head;
 }
 
+void task_next(void) {
+    
+    struct task* next_task = task_get_next();
+    if (!next_task) {
+        kernel_panic("No more tasks to start!\n");
+    }
+
+    task_switch(next_task);
+    task_return(&next_task->registers);
+
+}
+
 static void task_list_remove(struct task* task) {
 
     if (task->prev)

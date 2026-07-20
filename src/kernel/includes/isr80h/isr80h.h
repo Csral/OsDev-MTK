@@ -2,7 +2,7 @@
 #define KERNEL_INTERRUPTS_ISR80H_H
 
 enum SYSCALL_IDS {
-    SYS_SUM,
+    SYS_EXIT,
     SYS_PRINT,
     SYS_PRINT_EXT,
     SYS_GET_KET,

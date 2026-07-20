@@ -436,3 +436,79 @@ int process_inject_arguments(struct process* process, struct command_argument* r
     return res;
 
 }
+
+static int process_terminal_allocations(struct process* process) {
+
+    for (int i = 0; i < BasicOS_MAX_ALLOCATIONS_ALLOWED_PER_PROCESS; i++) {
+        
+        if (process->allocations[i].ptr)
+            process_free(process, process->allocations[i].ptr);
+
+    }
+
+    return 0;
+
+}
+
+static int process_unload_process(struct process* process) {
+
+    int res = 0;
+
+    switch (process->filetype) {
+        case PROCESS_FORMAT_FBIN:
+            kfree(process->ptr);
+        break;
+        case PROCESS_FORMAT_ELF:
+            elf_close(process->elf_file);
+        break;
+        default:
+            res = -EINVARG;
+        break;
+    };
+
+    return res;
+
+}
+
+void process_switch_available(void) {
+
+    for (int i = 0; i < BasicOS_MAX_PROCESSES; i++) {
+
+        if (processes[i]) {
+            process_switch(processes[i]);
+            return;
+        }
+
+    }
+
+    kernel_panic("No process to switch too!\n");
+
+}
+
+static void process_unlink(struct process* process) {
+    processes[process->id] = 0x00;
+
+    if (current_process == process)
+        process_switch_available();
+
+}
+
+int process_terminate(struct process* process) {
+
+    int res = 0;
+    res = process_terminal_allocations(process);
+    if (res < 0) goto out;
+
+    /* Unload the process data from memory */
+    res = process_unload_process(process);
+    kfree(process->stack);
+
+    /* Remove the task from task list */
+    task_free(process->task);
+    /* Remove the process from process list */
+    process_unlink(process);
+
+    out:
+    return res;
+
+}

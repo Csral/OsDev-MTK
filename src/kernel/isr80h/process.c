@@ -77,3 +77,21 @@ void* sys_get_process_arguments(struct interrupt_frame* frame) {
     return 0;
 
 }
+
+void* sys_exit(struct interrupt_frame* frame) {
+
+    /*
+    *
+    *   Improvements:
+    *   Collect an exit code argument and switch to parent process
+    *   and provide the error code into eax register of parent.
+    *
+    */
+
+    struct process* process = task_current()->process;
+    process_terminate(process);
+    task_next();
+
+    return 0;
+    
+}
