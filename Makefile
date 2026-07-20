@@ -1,4 +1,4 @@
-FILES = ./build/kernel.asm.o ./build/kernel.o ./build/loader/formats/elf.o ./build/loader/formats/elf_loader.o ./build/gdt/gdt.asm.o ./build/gdt/gdt.o ./build/idt/idt.asm.o ./build/idt/idt.o ./build/idt/interrupts.asm.o ./build/idt/interrupts_ext.asm.o ./build/idt/interrupts.o ./build/isr80h/isr80h.o ./build/isr80h/misc.o ./build/isr80h/io.o ./build/isr80h/memory.o ./build/isr80h/process.o ./build/memory/memory.o ./build/task/task.o ./build/task/task.asm.o ./build/task/tss.asm.o ./build/task/process.o ./build/io/io.asm.o ./build/memory/heap/heap.o ./build/memory/heap/kheap.o ./build/memory/paging/paging.asm.o ./build/memory/paging/paging.o ./build/disk/disk.o ./build/string/string.o ./build/fs/pparser.o ./build/disk/streamer.o ./build/fs/file.o ./build/fs/fat/fat16.o ./build/keyboard/keyboard.o ./build/keyboard/classic.o
+FILES = ./build/kernel.asm.o ./build/kernel.o ./build/loader/formats/elf.o ./build/loader/formats/elf_loader.o ./build/gdt/gdt.asm.o ./build/gdt/gdt.o ./build/idt/idt.asm.o ./build/idt/idt.o ./build/idt/interrupts.asm.o ./build/idt/interrupts_ext.asm.o ./build/idt/interrupts.o ./build/idt/irq.o ./build/isr80h/isr80h.o ./build/isr80h/misc.o ./build/isr80h/io.o ./build/isr80h/memory.o ./build/isr80h/process.o ./build/memory/memory.o ./build/task/task.o ./build/task/task.asm.o ./build/task/tss.asm.o ./build/task/process.o ./build/io/io.asm.o ./build/memory/heap/heap.o ./build/memory/heap/kheap.o ./build/memory/paging/paging.asm.o ./build/memory/paging/paging.o ./build/disk/disk.o ./build/string/string.o ./build/fs/pparser.o ./build/disk/streamer.o ./build/fs/file.o ./build/fs/fat/fat16.o ./build/keyboard/keyboard.o ./build/keyboard/classic.o
 INCLUDES = -I ./src/kernel/includes
 FLAGS = -g -ffreestanding -nostdlib -falign-jumps -falign-functions -falign-labels -falign-loops -fstrength-reduce -fomit-frame-pointer -finline-functions -Wno-unused-function -fno-builtin -Werror -Wno-unused-label -Wno-cpp -Wno-unused-parameter -nostartfiles -nodefaultlibs -Wall -O0 -Iinc
 
@@ -55,6 +55,9 @@ all: ./bin/boot.bin ./bin/extended.bin ./bin/kernel.bin
 
 ./build/idt/interrupts.o: ./src/kernel/idt/interrupts.c
 	i686-elf-gcc $(INCLUDES) $(FLAGS) -std=gnu99 -c ./src/kernel/idt/interrupts.c -o ./build/idt/interrupts.o
+
+./build/idt/irq.o: ./src/kernel/idt/irq.c
+	i686-elf-gcc $(INCLUDES) $(FLAGS) -std=gnu99 -c ./src/kernel/idt/irq.c -o ./build/idt/irq.o
 
 ./build/isr80h/isr80h.o: ./src/kernel/isr80h/isr80h.c
 	i686-elf-gcc $(INCLUDES) $(FLAGS) -std=gnu99 -c ./src/kernel/isr80h/isr80h.c -o ./build/isr80h/isr80h.o
