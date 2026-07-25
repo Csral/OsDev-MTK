@@ -21,10 +21,13 @@ Okay, as mentioned this is a ToyOS used purely for educational and experimental 
 * "Programming from the Ground Up"
 * [Writing a tiny bootloader](https://www.joe-bergeron.com/posts/Writing%20a%20Tiny%20x86%20Bootloader/)
 * [Ralf Brown's Interrupt List](https://www.ctyme.com/rbrown.htm)
+* ELF Specification Format (You can lookup for PDFs on the internet)
 
 A good portion of this project involves concepts not mentioned above. I became interested in systems programming at a really young age and some of the things I was already familiar with some of the concepts used here. So, I cannot provide references for them as I no longer remember where I obtained that knowledge. However, do contact me for any help, I'd be glad to help someone trying to write their own OS.
 
 Yes, I read both AMD and Intel's architecture manuals. While they overlap to a considerable amount, it was just fun to do so and a few concepts were easy in one of the book as opposed to the other.
+
+Read files in known_issues_fixed to know about a few issues I faced during this and how I overcame them. I've to finish writing the remaining ones.
 
 ## Warning
 **A BIG WARNING:** Now, obviously its very rare that someone actually stumbles here and even more rare for someone to think "Yes, let me install this on my x86 system" but on the odd-case someone (Hmm... the person reading this..?) is thinking to do that, then simply **don't**.
@@ -37,5 +40,5 @@ Will it boot? Maybe.
 Refer to [License](LICENSE).
 
 # Contact
-mailto: me@csral.dev
-mailto: chaturyasral@gmail.com
+* mailto: me@csral.dev
+* mailto: chaturyasral@gmail.com
