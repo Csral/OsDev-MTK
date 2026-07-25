@@ -1,4 +1,4 @@
-# MTK
+# BasicOS
 Goal: Make an interactive shell
 
 # Notice
